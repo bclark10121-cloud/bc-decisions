@@ -100,7 +100,7 @@ SCENES.ttf_flash=(g,t,w,h)=>{stadium(g,w,h,t);const r=rnd(9);for(let i=0;i<30;i+
 SCENES.ttf_kick=(g,t,w,h)=>{stadium(g,w,h,t);const p=(t%6)/6;g.fillStyle='#fff';g.fillRect(w*0.5-1,h*0.86,2,6);if(p<0.15){ball(g,w*0.5,h*0.84,-1.2)}else if(p<0.75){const u=(p-0.15)/0.6;ball(g,w*0.5+S(u*3)*4,h*0.84-u*h*0.6+S(u*Math.PI)*-h*0.15+u*u*h*0.05,u*20)}else{const u=(p-0.75)/0.25;g.fillStyle=`rgba(255,215,80,${1-u})`;g.font='bold 22px sans-serif';g.textAlign='center';g.fillText('GOOD!',w*0.5,h*0.24)}};
 
 // ---- shared: slow camera move over a whole scene ----
-function cam(g,w,h,t,period,zoom,panx,pany,fn){const u=0.5-0.5*C(t*TAU/period);const s=1+zoom*u;g.save();g.translate(w/2+panx*w*(u-0.5),h/2+pany*h*(u-0.5));g.scale(s,s);g.translate(-w/2,-h/2);fn();g.restore()}
+function cam(g,w,h,t,period,zoom,panx,pany,fn){const u=0.5-0.5*C(t*TAU/period);const s=1+zoom*(0.5+0.5*u);const k=v=>Math.max(-1,Math.min(1,v*2));g.save();g.translate(w/2+k(panx)*(2*u-1)*(s-1)*w/2,h/2+k(pany)*(2*u-1)*(s-1)*h/2);g.scale(s,s);g.translate(-w/2,-h/2);fn();g.restore()}
 function walker(g,x,y,t,col,lantern){const st=S(t*8);g.fillStyle=col;g.fillRect(x-3,y-16,6,10);g.beginPath();g.arc(x,y-19,3.5,0,TAU);g.fill();g.fillRect(x-3+st*2,y-6,2,6);g.fillRect(x+1-st*2,y-6,2,6);if(lantern){g.strokeStyle=col;g.lineWidth=1;g.beginPath();g.moveTo(x+3,y-12);g.lineTo(x+7,y-10);g.stroke();glow(g,x+7,y-8,16,'rgba(255,200,110,0.8)');g.fillStyle='#ffd88a';g.fillRect(x+5,y-10,4,5)}}
 // ===== By Lantern's Glow =====
 SCENES.blg_cam=(g,t,w,h)=>{cam(g,w,h,t,14,0.22,-0.25,0.05,()=>{peaksBase(g,w,h,0.55);poly(g,[[0,h*0.6],[w,h*0.6],[w,h*0.68],[0,h*0.68]],'rgba(255,236,230,0.7)')});cam(g,w,h,t,14,0.35,-0.5,0.1,()=>meadow(g,w,h,t,false))};
