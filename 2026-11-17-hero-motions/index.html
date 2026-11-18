@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Start screen hero motions</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     publish it as an artifact from files. BC picks, presses Copy my picks and pastes the text in chat. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:1000px;margin:auto;padding:0 20px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{max-width:1000px;margin:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+const SCENES = {};
+const TAU=Math.PI*2,S=Math.sin,C=Math.cos;
+function sky(g,w,h,stops){const gr=g.createLinearGradient(0,0,0,h);stops.forEach(([p,c])=>gr.addColorStop(p,c));g.fillStyle=gr;g.fillRect(0,0,w,h)}
+function poly(g,pts,col){g.fillStyle=col;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);pts.slice(1).forEach(p=>g.lineTo(p[0],p[1]));g.closePath();g.fill()}
+function glow(g,x,y,r,col){const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)}
+function rnd(n){let a=n*9301+49297;return()=>((a=(a*9301+49297)%233280)/233280)}
+function stars(g,w,h,t,n,seed){const r=rnd(seed);for(let i=0;i<n;i++){const x=r()*w,y=r()*h*0.55,a=0.3+0.5*(0.5+0.5*S(t*1.5+i));g.fillStyle=`rgba(255,248,220,${a})`;g.fillRect(x,y,1.5,1.5)}}
+function cloud(g,x,y,s,a){g.fillStyle=`rgba(255,240,235,${a})`;[[0,0,1],[0.8,-0.25,0.8],[1.6,0,0.9],[0.8,0.15,1]].forEach(([dx,dy,r])=>{g.beginPath();g.ellipse(x+dx*s,y+dy*s,s*r,s*r*0.5,0,0,TAU);g.fill()})}
+// ---------- By Lantern's Glow: Dawn Peaks ----------
+function peaksBase(g,w,h,dawn){sky(g,w,h,[[0,`hsl(${215-dawn*30},45%,${22+dawn*18}%)`],[0.55,`hsl(${20+dawn*10},70%,${55+dawn*12}%)`],[1,'#f6d6a8']]);
+ glow(g,w*0.62,h*0.5,w*(0.25+dawn*0.2),`rgba(255,220,150,${0.35+dawn*0.4})`);
+ poly(g,[[0,h*0.62],[w*0.18,h*0.3],[w*0.33,h*0.55],[w*0.5,h*0.22],[w*0.7,h*0.52],[w*0.85,h*0.32],[w,h*0.5],[w,h],[0,h]],'#5b5f86');
+ poly(g,[[w*0.18,h*0.3],[w*0.22,h*0.36],[w*0.15,h*0.35]],'#eef');poly(g,[[w*0.5,h*0.22],[w*0.55,h*0.3],[w*0.46,h*0.3]],'#eef')}
+function meadow(g,w,h,t,sway){poly(g,[[0,h*0.8],[w*0.4,h*0.74],[w,h*0.82],[w,h],[0,h]],'#6f9a52');const r=rnd(7);
+ for(let i=0;i<60;i++){const x=r()*w,y=h*0.8+r()*h*0.2,c=['#ffd36e','#f28fb0','#fff','#b9a2ff'][i%4],sx=sway?S(t*2+x*0.05)*3:0;g.strokeStyle='#3f6b33';g.beginPath();g.moveTo(x,y+6);g.lineTo(x+sx,y);g.stroke();g.fillStyle=c;g.fillRect(x+sx-1.5,y-1.5,3,3)}
+ g.fillStyle='#4a3424';g.fillRect(w*0.8,h*0.6,4,h*0.25);g.fillRect(w*0.8-14,h*0.63,28,6);glow(g,w*0.8+2,h*0.6,26,'rgba(255,200,110,0.7)');g.fillStyle='#ffd88a';g.fillRect(w*0.8-3,h*0.58,10,9)}
+SCENES.blg_clouds=(g,t,w,h)=>{const d=0.5+0.5*S(t*TAU/12);peaksBase(g,w,h,d);for(let i=0;i<6;i++){const x=((t*14+i*120)%(w+200))-100;cloud(g,x,h*0.56+(i%2)*10,22+(i%3)*8,0.85)}poly(g,[[0,h*0.6],[w,h*0.6],[w,h*0.68],[0,h*0.68]],'rgba(255,236,230,0.6)');meadow(g,w,h,t,false)};
+SCENES.blg_sunrise=(g,t,w,h)=>{const p=(t%10)/10;peaksBase(g,w,h,p);g.save();g.translate(w*0.62,h*0.62-p*h*0.25);for(let i=0;i<10;i++){g.rotate(TAU/10);g.fillStyle=`rgba(255,230,170,${0.12*p})`;g.fillRect(0,-3,w,6)}g.restore();g.fillStyle='#ffe7a8';g.beginPath();g.arc(w*0.62,h*0.62-p*h*0.25,16,0,TAU);g.fill();poly(g,[[0,h*0.62],[w,h*0.62],[w,h*0.7],[0,h*0.7]],'rgba(255,236,230,0.7)');meadow(g,w,h,t,false)};
+SCENES.blg_petals=(g,t,w,h)=>{peaksBase(g,w,h,0.6);poly(g,[[0,h*0.62],[w,h*0.62],[w,h*0.7],[0,h*0.7]],'rgba(255,236,230,0.7)');meadow(g,w,h,t,true);const r=rnd(3);for(let i=0;i<26;i++){const sp=20+r()*25,x=((t*sp+r()*w)%(w+40))-20,y=h*0.3+r()*h*0.6+S(t*2+i)*10;g.fillStyle=['#f6a8c3','#fff','#ffd36e'][i%3];g.save();g.translate(x,y);g.rotate(t*3+i);g.fillRect(-3,-1.5,6,3);g.restore()}};
+// ---------- Pixel Hollow: pixel Lantern Hill ----------
+function px(g,x,y,s,c){g.fillStyle=c;g.fillRect(Math.round(x/s)*s,Math.round(y/s)*s,s,s)}
+function pixelBase(g,w,h,t){g.imageSmoothingEnabled=false;sky(g,w,h,[[0,'#151338'],[0.6,'#3b2f6b'],[1,'#5a3f7a']]);const r=rnd(11);for(let i=0;i<60;i++)px(g,r()*w,r()*h*0.5,3,(Math.floor(t*2+i)%5)?'#cfd2ff':'#ffffff');
+ px(g,w*0.15,h*0.15,0,'#000');g.fillStyle='#f3efc8';g.fillRect(w*0.13,h*0.1,18,18);g.fillStyle='#151338';g.fillRect(w*0.13+6,h*0.1-3,18,18);
+ for(let x=0;x<w;x+=6){const y1=h*0.62+S(x*0.012)*18,y2=h*0.78+S(x*0.02+1)*10;g.fillStyle='#2b4a3a';g.fillRect(x,y1,6,h);g.fillStyle='#3d6b47';g.fillRect(x,y2,6,h)}
+ g.fillStyle='#2a1c14';g.fillRect(w*0.55,h*0.42,6,h*0.36);g.fillStyle='#ffd27a';g.fillRect(w*0.55-6,h*0.38,18,12);
+ g.fillStyle='#7a4a22';g.fillRect(w*0.55-28,h*0.74,30,18);g.fillStyle='#c98a3a';g.fillRect(w*0.55-28,h*0.74,30,5);g.fillStyle='#ffd34d';g.fillRect(w*0.55-15,h*0.78,4,5)}
+SCENES.ph_fireflies=(g,t,w,h)=>{pixelBase(g,w,h,t);glow(g,w*0.55+3,h*0.44,70,'rgba(255,210,120,0.35)');for(let i=0;i<14;i++){const p=((t/8+i/14)%1),a=p*TAU*2+i,r=6+p*30;const x=w*0.55-13+C(a)*r,y=h*0.76-p*h*0.34;px(g,x,y,3,`rgba(255,240,140,${1-p*0.6})`)}};
+SCENES.ph_chest=(g,t,w,h)=>{pixelBase(g,w,h,t);glow(g,w*0.55+3,h*0.44,60,'rgba(255,210,120,0.3)');const o=Math.max(0,S(t*TAU/6));glow(g,w*0.55-13,h*0.74,20+o*40,`rgba(255,215,90,${0.25+o*0.5})`);g.fillStyle='#c98a3a';g.fillRect(w*0.55-28,h*0.74-o*8,30,5);for(let i=0;i<8;i++){const q=((t*0.6+i/8)%1);px(g,w*0.55-26+i*4+S(t+i)*4,h*0.73-q*40*o,3,`rgba(255,250,180,${o*(1-q)})`)}};
+SCENES.ph_stars=(g,t,w,h)=>{pixelBase(g,w,h,t);glow(g,w*0.55+3,h*0.44,60,'rgba(255,210,120,0.3)');for(let k=0;k<2;k++){const p=((t+k*3.5)%7)/2.2;if(p<1){const x0=w*(0.95-k*0.3),y0=h*(0.05+k*0.08);for(let j=0;j<8;j++)px(g,x0-p*w*0.5+j*6,y0+p*h*0.25-j*3,3,`rgba(255,255,255,${(1-j/8)*(1-p)})`)}}};
+// ---------- Home by Dusk: cottage window at dusk ----------
+function cottage(g,w,h,t,flick){sky(g,w,h,[[0,'#2d3561'],[0.5,'#c06c84'],[1,'#f8b195']]);glow(g,w*0.3,h*0.55,w*0.3,'rgba(255,180,120,0.35)');
+ const pine=(x,b,s,c)=>poly(g,[[x,b-s*2.2],[x-s*0.6,b],[x+s*0.6,b]],c);for(let i=0;i<9;i++)pine(i*w/8,h*0.75,30+(i%3)*10,'#3a2d4f');
+ poly(g,[[0,h*0.78],[w,h*0.74],[w,h],[0,h]],'#2a2338');g.fillStyle='#4b3a3a';g.fillRect(w*0.45,h*0.5,w*0.22,h*0.28);poly(g,[[w*0.42,h*0.52],[w*0.56,h*0.36],[w*0.7,h*0.52]],'#6b3e3e');g.fillStyle='#3a2b2b';g.fillRect(w*0.62,h*0.36,12,h*0.12);
+ const f=flick?0.85+0.15*S(t*9)*S(t*4.3):1;glow(g,w*0.53,h*0.62,50,`rgba(255,190,90,${0.5*f})`);g.fillStyle=`rgba(255,${200+30*f|0},120,1)`;g.fillRect(w*0.5,h*0.58,22,18);g.fillStyle='#4b3a3a';g.fillRect(w*0.5+10,h*0.58,2,18);g.fillRect(w*0.5,h*0.58+8,22,2)}
+SCENES.hbd_smoke=(g,t,w,h)=>{cottage(g,w,h,t,true);for(let i=0;i<12;i++){const p=((t/9+i/12)%1),x=w*0.62+6+S(p*6+t*0.6)*14+p*w*0.25,y=h*0.35-p*h*0.33,r=5+p*16;g.fillStyle=`rgba(225,215,230,${0.45*(1-p)})`;g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}};
+SCENES.hbd_birds=(g,t,w,h)=>{cottage(g,w,h,t,true);for(let i=0;i<7;i++){const p=((t/10+i*0.05)%1),x=-20+p*(w+40),y=h*0.18+S(p*4+i)*8+(i%3)*8+i*2,fl=S(t*10+i)*4;g.strokeStyle='#1d1830';g.lineWidth=1.5;g.beginPath();g.moveTo(x-6,y-fl);g.lineTo(x,y);g.lineTo(x+6,y-fl);g.stroke()}};
+SCENES.hbd_fireflies=(g,t,w,h)=>{cottage(g,w,h,t,true);for(let i=0;i<22;i++){const x=(i*53%w)+S(t*0.7+i)*20,y=h*0.55+(i*37%(h*0.4))+C(t*0.9+i*2)*12,a=0.4+0.6*(0.5+0.5*S(t*2+i));glow(g,x,y,8,`rgba(220,255,140,${a*0.5})`);g.fillStyle=`rgba(240,255,170,${a})`;g.fillRect(x-1,y-1,2.5,2.5)}};
+// ---------- Tiny Tailwind: undersea keep ----------
+function sea(g,w,h,t){sky(g,w,h,[[0,'#1d7a8c'],[0.6,'#114a6b'],[1,'#0a2740']]);for(let i=0;i<5;i++){const x=w*(0.08+i*0.2)+S(t*0.3+i)*10;g.fillStyle=`rgba(210,255,240,${0.07+0.03*S(t*0.8+i)})`;g.beginPath();g.moveTo(x-12,0);g.lineTo(x+12,0);g.lineTo(x+60,h);g.lineTo(x+20,h);g.fill()}
+ poly(g,[[0,h*0.85],[w*0.3,h*0.8],[w*0.6,h*0.86],[w,h*0.8],[w,h],[0,h]],'#c9b98a');g.fillStyle='#2f5f6e';g.fillRect(w*0.42,h*0.45,w*0.16,h*0.38);poly(g,[[w*0.4,h*0.46],[w*0.5,h*0.3],[w*0.6,h*0.46]],'#3d7584');glow(g,w*0.5,h*0.55,30,'rgba(255,240,170,0.5)');g.fillStyle='#ffe9a0';g.fillRect(w*0.5-5,h*0.52,10,12)}
+function kelp(g,w,h,t,amt){for(let i=0;i<7;i++){const x=w*(0.05+i*0.15);g.strokeStyle='#3f8a4f';g.lineWidth=4;g.beginPath();g.moveTo(x,h);for(let k=1;k<=8;k++)g.lineTo(x+S(t*1.2+k*0.6+i)*k*amt,h-k*h*0.07);g.stroke()}}
+SCENES.tt_manta=(g,t,w,h)=>{sea(g,w,h,t);kelp(g,w,h,t,1.5);const p=(t%10)/10,x=-60+p*(w+120),y=h*0.3+S(p*TAU)*h*0.08,fl=S(t*3)*12;g.fillStyle='#1b3550';g.beginPath();g.moveTo(x+30,y);g.quadraticCurveTo(x,y-30-fl,x-28,y-4);g.quadraticCurveTo(x-8,y+4,x+30,y);g.quadraticCurveTo(x,y+30+fl,x-28,y+4);g.fill();g.strokeStyle='#1b3550';g.lineWidth=2;g.beginPath();g.moveTo(x-20,y);g.lineTo(x-50,y+3);g.stroke();for(let i=0;i<6;i++){const q=((t*0.5+i/6)%1);g.strokeStyle='rgba(220,255,255,0.5)';g.beginPath();g.arc(w*0.7+S(t+i)*5,h*0.85-q*h*0.8,2+i%3,0,TAU);g.stroke()}};
+SCENES.tt_fish=(g,t,w,h)=>{sea(g,w,h,t);kelp(g,w,h,t,1.5);for(let i=0;i<24;i++){const a=t*0.6+i*0.26,rx=w*0.3+S(i)*15,ry=h*0.18;const x=w*0.5+C(a)*rx,y=h*0.5+S(a)*ry+S(i*3)*8,dir=-S(a)>0?1:-1;g.fillStyle=i%3?'#ffb347':'#ffe066';g.beginPath();g.ellipse(x,y,6,3,0,0,TAU);g.fill();poly(g,[[x-6*dir,y],[x-10*dir,y-3],[x-10*dir,y+3]],g.fillStyle)}};
+SCENES.tt_kelp=(g,t,w,h)=>{sea(g,w,h,t);kelp(g,w,h,t,4);for(let c=0;c<3;c++)for(let i=0;i<10;i++){const q=((t*0.35+i/10+c*0.3)%1),x=w*(0.2+c*0.3)+S(t*2+i)*6;g.strokeStyle=`rgba(220,255,255,${0.7*(1-q)})`;g.lineWidth=1.5;g.beginPath();g.arc(x,h*0.85-q*h*0.85,2+q*6,0,TAU);g.stroke()}};
+// ---------- The Scenic Route: mountain road at golden hour ----------
+function road(g,w,h,t,sun){sky(g,w,h,[[0,'#3c6fa8'],[0.5,`hsl(${35-sun*15},85%,${68-sun*12}%)`],[1,'#f7c873']]);glow(g,w*0.75,h*(0.35+sun*0.2),w*0.3,'rgba(255,210,120,0.6)');g.fillStyle='#fff3c4';g.beginPath();g.arc(w*0.75,h*(0.35+sun*0.2),14,0,TAU);g.fill();
+ poly(g,[[0,h*0.55],[w*0.2,h*0.25],[w*0.4,h*0.5],[w*0.6,h*0.2],[w*0.85,h*0.48],[w,h*0.35],[w,h],[0,h]],'#7d6a8f');poly(g,[[0,h*0.7],[w*0.3,h*0.55],[w*0.6,h*0.68],[w,h*0.58],[w,h],[0,h]],'#b07a4a');
+ g.strokeStyle='#4b4250';g.lineWidth=10;g.beginPath();g.moveTo(-10,h*0.95);g.bezierCurveTo(w*0.3,h*0.7,w*0.5,h*0.95,w*0.7,h*0.72);g.bezierCurveTo(w*0.8,h*0.62,w*0.9,h*0.66,w+10,h*0.6);g.stroke()}
+function car(g,x,y,glint){g.fillStyle='#c0392b';g.fillRect(x-14,y-7,28,8);g.fillRect(x-8,y-12,16,6);g.fillStyle='#222';g.fillRect(x-10,y,6,4);g.fillRect(x+4,y,6,4);if(glint>0){g.fillStyle=`rgba(255,255,230,${glint})`;g.beginPath();g.moveTo(x-4,y-11);g.lineTo(x-4+10*glint,y-30);g.lineTo(x-4,y-11);g.lineTo(x+20*glint,y-14);g.fill();glow(g,x-3,y-11,14*glint+2,`rgba(255,255,220,${glint})`)}}
+SCENES.sr_clouds=(g,t,w,h)=>{road(g,w,h,t,0.3);for(let i=0;i<5;i++){const x=((t*12+i*130)%(w+200))-100;cloud(g,x,h*(0.15+(i%3)*0.08),18+(i%2)*10,0.8)}const gl=Math.max(0,S(t*TAU/6))**8;car(g,w*0.64,h*0.74,gl)};
+function bez(p0,p1,p2,p3,u){const v=1-u;return v*v*v*p0+3*v*v*u*p1+3*v*u*u*p2+u*u*u*p3}
+SCENES.sr_drive=(g,t,w,h)=>{road(g,w,h,t,0.3);const p=(t%9)/9;let x,y;if(p<0.6){const u=p/0.6;x=bez(-10,w*0.3,w*0.5,w*0.7,u);y=bez(h*0.95,h*0.7,h*0.95,h*0.72,u)}else{const u=(p-0.6)/0.4;x=bez(w*0.7,w*0.8,w*0.9,w+10,u);y=bez(h*0.72,h*0.62,h*0.66,h*0.6,u)}car(g,x,y-4,0);for(let i=0;i<4;i++){g.fillStyle=`rgba(230,200,160,${0.3-i*0.07})`;g.beginPath();g.arc(x-18-i*8,y-2,4+i*2,0,TAU);g.fill()}};
+SCENES.sr_sunset=(g,t,w,h)=>{const s=0.5+0.5*S(t*TAU/12);road(g,w,h,t,s);g.fillStyle=`rgba(80,30,90,${s*0.35})`;g.fillRect(0,0,w,h);car(g,w*0.64,h*0.74,0);glow(g,w*0.64+14,h*0.73,10+s*10,`rgba(255,230,150,${s})`)};
+// ---------- Lo-Fi League: pitch at sunset ----------
+function pitch(g,w,h,t){sky(g,w,h,[[0,'#40306b'],[0.45,'#e8846b'],[0.62,'#ffc58a']]);glow(g,w*0.2,h*0.55,w*0.3,'rgba(255,200,140,0.5)');poly(g,[[0,h*0.6],[w,h*0.6],[w,h],[0,h]],'#4c8a4a');for(let i=0;i<6;i++){g.fillStyle=i%2?'#4c8a4a':'#56974f';g.fillRect(0,h*0.6+i*h*0.067,w,h*0.067)}
+ g.strokeStyle='rgba(255,255,255,0.7)';g.lineWidth=2;g.strokeRect(w*0.08,h*0.64,w*0.84,h*0.32);g.beginPath();g.moveTo(w*0.5,h*0.64);g.lineTo(w*0.5,h*0.96);g.stroke();g.beginPath();g.ellipse(w*0.5,h*0.8,w*0.09,h*0.06,0,0,TAU);g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(w*0.5,h*0.8,4,0,TAU);g.fill()}
+function flag(g,x,y,t,big){g.strokeStyle='#ddd';g.lineWidth=2;g.beginPath();g.moveTo(x,y);g.lineTo(x,y-22);g.stroke();g.fillStyle='#ffd34d';g.beginPath();g.moveTo(x,y-22);for(let k=0;k<=6;k++)g.lineTo(x+k*2.5*(big?1.4:1),y-22+S(t*6-k)*(big?3:1.5));for(let k=6;k>=0;k--)g.lineTo(x+k*2.5*(big?1.4:1),y-14+S(t*6-k)*(big?3:1.5));g.fill()}
+SCENES.lf_flags=(g,t,w,h)=>{pitch(g,w,h,t);for(let i=0;i<5;i++){const x=((t*10+i*140)%(w+200))-100;cloud(g,x,h*(0.15+(i%3)*0.07),16+(i%2)*8,0.7)}[[0.08,0.64],[0.92,0.64],[0.08,0.96],[0.92,0.96]].forEach(([a,b])=>flag(g,w*a,h*b,t,true))};
+SCENES.lf_sprinkler=(g,t,w,h)=>{pitch(g,w,h,t);[[0.3,0.8],[0.7,0.8]].forEach(([a,b],k)=>{const cx=w*a,cy=h*b,ang=Math.PI+0.6+0.9*(0.5+0.5*S(t*TAU/8+k*Math.PI));for(let i=0;i<26;i++){const d=i*4.5,x=cx+C(ang)*d,y=cy+S(ang)*d*0.5-S(i/26*Math.PI)*22;g.fillStyle=`rgba(220,240,255,${0.75-i*0.02})`;g.fillRect(x,y,2.5,2.5)}glow(g,cx+C(ang)*110,cy+S(ang)*55,24,'rgba(255,220,180,0.25)')});[[0.08,0.64],[0.92,0.64]].forEach(([a,b])=>flag(g,w*a,h*b,t,false))};
+SCENES.lf_ball=(g,t,w,h)=>{pitch(g,w,h,t);g.fillStyle='#4c8a4a';g.beginPath();g.arc(w*0.5,h*0.8,5,0,TAU);g.fill();const p=S(t*TAU/10),x=w*0.5+p*w*0.32,y=h*0.8;g.fillStyle='rgba(0,0,0,0.25)';g.beginPath();g.ellipse(x,y+5,7,2.5,0,0,TAU);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(x,y,6,0,TAU);g.fill();g.fillStyle='#333';g.save();g.translate(x,y);g.rotate(p*12);g.fillRect(-2,-2,4,4);g.restore();[[0.08,0.64],[0.92,0.64]].forEach(([a,b])=>flag(g,w*a,h*b,t,false))};
+// ---------- Tiny Titans Football: stadium under the lights ----------
+function stadium(g,w,h,t){sky(g,w,h,[[0,'#0b1430'],[0.6,'#1d2a5a'],[1,'#2a3870']]);stars(g,w,h,t,40,5);g.fillStyle='#252a3f';poly(g,[[0,h*0.35],[w,h*0.35],[w,h*0.62],[0,h*0.62]],'#232842');const r=rnd(2);for(let i=0;i<220;i++){g.fillStyle=['#c44','#ddd','#36c','#cc4'][i%4];g.fillRect(r()*w,h*0.37+r()*h*0.23,2,2)}
+ poly(g,[[0,h*0.62],[w,h*0.62],[w,h],[0,h]],'#2f7a3a');g.strokeStyle='rgba(255,255,255,0.6)';for(let i=1;i<6;i++){g.beginPath();g.moveTo(w*i/6-30*(i-3),h*0.62);g.lineTo(w*i/6-60*(i-3),h);g.stroke()}
+ g.strokeStyle='#ffd34d';g.lineWidth=4;g.beginPath();g.moveTo(w*0.5,h*0.66);g.lineTo(w*0.5,h*0.5);g.moveTo(w*0.42,h*0.5);g.lineTo(w*0.58,h*0.5);g.moveTo(w*0.42,h*0.5);g.lineTo(w*0.42,h*0.3);g.moveTo(w*0.58,h*0.5);g.lineTo(w*0.58,h*0.3);g.stroke();
+ [0.1,0.9].forEach(a=>{g.fillStyle='#555';g.fillRect(w*a-2,h*0.1,4,h*0.27);g.fillStyle='#fffbe0';g.fillRect(w*a-12,h*0.08,24,8);glow(g,w*a,h*0.12,30,'rgba(255,255,220,0.5)')})}
+function ball(g,x,y,rot){g.save();g.translate(x,y);g.rotate(rot);g.fillStyle='#8b4a22';g.beginPath();g.ellipse(0,0,8,5,0,0,TAU);g.fill();g.strokeStyle='#fff';g.lineWidth=1;g.beginPath();g.moveTo(-3,0);g.lineTo(3,0);g.stroke();g.restore()}
+SCENES.ttf_beams=(g,t,w,h)=>{stadium(g,w,h,t);[0.1,0.9].forEach((a,k)=>{const ang=Math.PI/2+(k?0.5:-0.5)+S(t*TAU/8+k)*0.45;g.save();g.translate(w*a,h*0.12);g.rotate(ang);const gr=g.createLinearGradient(0,0,h*1.1,0);gr.addColorStop(0,'rgba(255,255,220,0.45)');gr.addColorStop(1,'rgba(255,255,220,0)');g.fillStyle=gr;g.beginPath();g.moveTo(0,0);g.lineTo(h*1.1,-40);g.lineTo(h*1.1,40);g.fill();g.restore()});g.fillStyle='#fff';g.fillRect(w*0.5-1,h*0.86,2,6);ball(g,w*0.5,h*0.84,-1.2)};
+SCENES.ttf_flash=(g,t,w,h)=>{stadium(g,w,h,t);const r=rnd(9);for(let i=0;i<30;i++){const x=r()*w,y=h*0.38+r()*h*0.22,ph=(t*0.4+r())%1;if(ph<0.06)glow(g,x,y,10,'rgba(255,255,255,0.9)')}g.fillStyle='#111';g.fillRect(w*0.3,h*0.36,w*0.4,14);g.fillStyle='#ffd34d';g.font='bold 11px monospace';g.fillText('TINY TITANS  *  KICKOFF TONIGHT  *  '.repeat(2),w*0.3-((t*30)%220),h*0.36+11);g.fillStyle='#232842';g.fillRect(0,h*0.36,w*0.3,14);g.fillRect(w*0.7,h*0.36,w*0.3,14);ball(g,w*0.5,h*0.84,-1.2)};
+SCENES.ttf_kick=(g,t,w,h)=>{stadium(g,w,h,t);const p=(t%6)/6;g.fillStyle='#fff';g.fillRect(w*0.5-1,h*0.86,2,6);if(p<0.15){ball(g,w*0.5,h*0.84,-1.2)}else if(p<0.75){const u=(p-0.15)/0.6;ball(g,w*0.5+S(u*3)*4,h*0.84-u*h*0.6+S(u*Math.PI)*-h*0.15+u*u*h*0.05,u*20)}else{const u=(p-0.75)/0.25;g.fillStyle=`rgba(255,215,80,${1-u})`;g.font='bold 22px sans-serif';g.textAlign='center';g.fillText('GOOD!',w*0.5,h*0.24)}};
+
+const DECISION = {
+ "title": "Start screen hero motions",
+ "intro": "Three hero motion options for each game's start screen. Each preview is a rough sketch drawn live, not the game's real art. Pick one per game, then press Copy my picks and paste it in chat.",
+ "note": "Keeper of the Hollow is done (the sweeping beam). Each pick becomes the big, slow motion a player sees in the first two seconds, built over the game's own painted scene with small background motion around it. Reduce motion holds it still. Use the notes box for changes such as slower or fewer.",
+ "label": "Hero motion picks",
+ "questions": [
+  {
+   "id": "blg",
+   "name": "By Lantern's Glow",
+   "sub": "Dawn Peaks: mountains above a sea of clouds, a meadow and a lantern signpost.",
+   "options": [
+    {
+     "title": "The sea of clouds rolls past the peaks as the dawn light grows",
+     "meta": [
+      "Slow 12-second dawn swell",
+      "Most of the screen moves"
+     ],
+     "media": {
+      "draw": "blg_clouds"
+     },
+     "rec": true
+    },
+    {
+     "title": "The sun rises behind the peaks with soft light rays",
+     "meta": [
+      "10-second sunrise loop",
+      "Strong focal point"
+     ],
+     "media": {
+      "draw": "blg_sunrise"
+     },
+     "rec": false
+    },
+    {
+     "title": "Wildflowers sway and petals drift across the screen",
+     "meta": [
+      "Busy foreground motion",
+      "Mountains stay still"
+     ],
+     "media": {
+      "draw": "blg_petals"
+     },
+     "rec": false
+    }
+   ]
+  },
+  {
+   "id": "ph",
+   "name": "Pixel Hollow",
+   "sub": "A pixel Lantern Hill at night with a chest under the lamp.",
+   "options": [
+    {
+     "title": "Fireflies spiral up from the chest into the lamp light",
+     "meta": [
+      "8-second loop",
+      "Ties the chest to the lamp"
+     ],
+     "media": {
+      "draw": "ph_fireflies"
+     },
+     "rec": true
+    },
+    {
+     "title": "The chest lid creaks open and gold sparkles rise",
+     "meta": [
+      "6-second open and close",
+      "Hints at treasure"
+     ],
+     "media": {
+      "draw": "ph_chest"
+     },
+     "rec": false
+    },
+    {
+     "title": "Shooting stars streak across the pixel sky",
+     "meta": [
+      "Two stars every 7 seconds",
+      "Calm, sky only"
+     ],
+     "media": {
+      "draw": "ph_stars"
+     },
+     "rec": false
+    }
+   ]
+  },
+  {
+   "id": "hbd",
+   "name": "Home by Dusk",
+   "sub": "A cottage window glowing at dusk in the painted forest.",
+   "options": [
+    {
+     "title": "Chimney smoke curls up and drifts across the dusk sky",
+     "meta": [
+      "9-second drift",
+      "Cozy, home feeling"
+     ],
+     "media": {
+      "draw": "hbd_smoke"
+     },
+     "rec": true
+    },
+    {
+     "title": "Birds fly home across the dusk sky",
+     "meta": [
+      "10-second flight",
+      "Matches the game name"
+     ],
+     "media": {
+      "draw": "hbd_birds"
+     },
+     "rec": false
+    },
+    {
+     "title": "Fireflies drift through the pines",
+     "meta": [
+      "Ambient glow everywhere",
+      "Softer hero motion"
+     ],
+     "media": {
+      "draw": "hbd_fireflies"
+     },
+     "rec": false
+    }
+   ]
+  },
+  {
+   "id": "tt",
+   "name": "Tiny Tailwind",
+   "sub": "The undersea keep with light shafts and bubbles.",
+   "options": [
+    {
+     "title": "A manta glides across the keep through the light shafts",
+     "meta": [
+      "10-second glide",
+      "Shows the game's hero creature"
+     ],
+     "media": {
+      "draw": "tt_manta"
+     },
+     "rec": true
+    },
+    {
+     "title": "A school of fish circles the keep",
+     "meta": [
+      "Constant swirl",
+      "Lots of color"
+     ],
+     "media": {
+      "draw": "tt_fish"
+     },
+     "rec": false
+    },
+    {
+     "title": "Kelp sways hard and bubble columns rise",
+     "meta": [
+      "Whole scene sways",
+      "No creature"
+     ],
+     "media": {
+      "draw": "tt_kelp"
+     },
+     "rec": false
+    }
+   ]
+  },
+  {
+   "id": "sr",
+   "name": "The Scenic Route",
+   "sub": "A winding mountain road at golden hour.",
+   "options": [
+    {
+     "title": "Clouds sail over the peaks and the sun glints off the parked car",
+     "meta": [
+      "Glint every 6 seconds",
+      "Car stays parked"
+     ],
+     "media": {
+      "draw": "sr_clouds"
+     },
+     "rec": false
+    },
+    {
+     "title": "A car winds up the road and drives off with a dust trail",
+     "meta": [
+      "9-second drive",
+      "Shows what the game is about"
+     ],
+     "media": {
+      "draw": "sr_drive"
+     },
+     "rec": true
+    },
+    {
+     "title": "The sun sinks slowly and the sky deepens",
+     "meta": [
+      "12-second color shift",
+      "Very calm, little movement"
+     ],
+     "media": {
+      "draw": "sr_sunset"
+     },
+     "rec": false
+    }
+   ]
+  },
+  {
+   "id": "lf",
+   "name": "Lo-Fi League",
+   "sub": "An empty pitch at sunset with a ball on the centre spot.",
+   "options": [
+    {
+     "title": "Corner flags wave and sunset clouds drift over the pitch",
+     "meta": [
+      "Gentle, small movement",
+      "May read as too still"
+     ],
+     "media": {
+      "draw": "lf_flags"
+     },
+     "rec": false
+    },
+    {
+     "title": "Sprinklers sweep arcs of water across the pitch",
+     "meta": [
+      "8-second sweep",
+      "Big motion, still lo-fi calm"
+     ],
+     "media": {
+      "draw": "lf_sprinkler"
+     },
+     "rec": true
+    },
+    {
+     "title": "The ball rolls slowly from the centre spot and back",
+     "meta": [
+      "10-second roll",
+      "Ball leaves the centre spot"
+     ],
+     "media": {
+      "draw": "lf_ball"
+     },
+     "rec": false
+    }
+   ]
+  },
+  {
+   "id": "ttf",
+   "name": "Tiny Titans Football",
+   "sub": "A stadium under the lights with the goalposts and a ball on the tee.",
+   "options": [
+    {
+     "title": "The light towers sweep their beams across the field",
+     "meta": [
+      "8-second sweep",
+      "Big-game feel"
+     ],
+     "media": {
+      "draw": "ttf_beams"
+     },
+     "rec": false
+    },
+    {
+     "title": "Camera flashes in the crowd and a scrolling scoreboard",
+     "meta": [
+      "Flashes kept under 3 a second",
+      "Busy"
+     ],
+     "media": {
+      "draw": "ttf_flash"
+     },
+     "rec": false
+    },
+    {
+     "title": "The ball is kicked off the tee and sails through the posts",
+     "meta": [
+      "6-second kick loop",
+      "Pure football, very clear"
+     ],
+     "media": {
+      "draw": "ttf_kick"
+     },
+     "rec": true
+    }
+   ]
+  }
+ ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=480;e.height=270;e.style.cssText='width:100%;border-radius:10px;margin:8px 0;background:#000';e.dataset.draw=md.draw;c.appendChild(e)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+(function loop(ms){for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,ms/1000,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
