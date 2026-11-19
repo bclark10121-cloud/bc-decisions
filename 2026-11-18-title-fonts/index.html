@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Start screen titles: placement and fonts</title>
+<!-- Decision page (G0.16), 2026-11-18. Every font ships beside this page in fonts/. Nothing loads from other sites. -->
+<style id="ff"></style>
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:700 28px Georgia,serif;margin:0 0 6px}h2{font:700 22px Georgia,serif;margin:34px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px;max-width:1100px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px system-ui,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;max-width:1100px;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px system-ui,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}
+
+/* ---------- preview stage: 800 x 600, everything sized in container units ---------- */
+.stage{position:relative;width:100%;max-width:800px;aspect-ratio:4/3;margin:8px 0;border-radius:10px;overflow:hidden;container-type:inline-size;background:#000}
+.sc,.sc *{position:absolute}
+.ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;z-index:5}
+.sky{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2cqw 0}
+.ttl{white-space:nowrap;line-height:1.05;text-align:center;font-size:11cqw;text-shadow:0 0 2.2cqw var(--glow),0 0 .6cqw rgba(0,0,0,.6),0 .35cqw 0 rgba(0,0,0,.45)}
+.tag{font:600 2.1cqw system-ui,sans-serif;letter-spacing:.35cqw;text-transform:uppercase;color:#f4ecdc;margin-top:2.2cqw;text-shadow:0 .2cqw .5cqw rgba(0,0,0,.8)}
+.keys{font:500 1.75cqw system-ui,sans-serif;color:#efe6d6;margin-bottom:1.3cqw;text-shadow:0 .15cqw .4cqw #000}
+.btn{width:46cqw;height:6.4cqw;border-radius:1.4cqw;display:flex;align-items:center;justify-content:center;font:600 2.5cqw system-ui,sans-serif;margin-bottom:1.3cqw;background:#c39143;color:#24180c;border:.25cqw solid #e8c27a}
+.btn.ghost{background:rgba(10,10,20,.55);color:#f2ead8;border-color:rgba(255,255,255,.6)}
+.ver{font:500 1.5cqw system-ui,sans-serif;color:#cfc6b6;margin:.4cqw 0 1.6cqw;opacity:.8}
+.stars{inset:0;background-image:radial-gradient(1.2px 1.2px at 12% 18%,#fff 98%,transparent),radial-gradient(1px 1px at 33% 9%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 58% 22%,#fff 98%,transparent),radial-gradient(1px 1px at 77% 12%,#fff 98%,transparent),radial-gradient(1.2px 1.2px at 88% 31%,#fff 98%,transparent),radial-gradient(1px 1px at 22% 38%,#fff 98%,transparent),radial-gradient(1px 1px at 47% 41%,#fff 98%,transparent),radial-gradient(1.3px 1.3px at 6% 52%,#fff 98%,transparent),radial-gradient(1px 1px at 69% 47%,#fff 98%,transparent),radial-gradient(1px 1px at 94% 6%,#fff 98%,transparent);opacity:.85}
+
+/* layout question: phone portrait + landscape pair */
+.pair{position:relative;width:100%;max-width:800px;aspect-ratio:4/3;margin:8px 0;border-radius:10px;background:#0b0a12;display:flex;gap:4%;align-items:center;justify-content:center;padding:3%}
+.pair .lab{position:absolute;top:2%;font:600 12px system-ui;color:#a9a2b8}
+.phone{height:92%;aspect-ratio:9/16;border-radius:14px;overflow:hidden;position:relative;container-type:inline-size;border:3px solid #2b2838}
+.land{width:52%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;position:relative;container-type:inline-size;border:3px solid #2b2838}
+.phone .ttl{font-size:14cqw}.phone .tag{font-size:3.6cqw;letter-spacing:.5cqw}.phone .btn{width:78cqw;height:12cqw;font-size:4.6cqw;border-radius:2.6cqw;margin-bottom:2.6cqw}.phone .keys{font-size:3.2cqw;margin-bottom:2.6cqw}.phone .ver{font-size:3cqw;margin-bottom:4cqw}
+.land .ttl{font-size:8.5cqw}.land .tag{font-size:1.6cqw}.land .btn{width:32cqw;height:4.4cqw;font-size:1.8cqw;margin-bottom:.9cqw}.land .keys{font-size:1.3cqw}.land .ver{font-size:1.2cqw}
+.today .sky{justify-content:flex-start;padding-top:6%}.today .ttl{font-weight:700;letter-spacing:.6cqw}.today .ttl{font-size:9cqw!important}.today .phone .ttl{font-size:10.5cqw!important}.today .land .ttl{font-size:5.2cqw!important}
+.center .ui{justify-content:flex-start}.center .sky{flex:none;height:100%;position:absolute;inset:0}.center .low{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center}
+.center .phone .low{bottom:0}.center .land .sky{width:55%}.center .land .low{left:auto;right:3%;width:40%;bottom:50%;transform:translateY(50%)}
+.mid .land .sky{width:55%}.mid .land .ui{flex-direction:row}.mid .land .low{width:42%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.low{display:flex;flex-direction:column;align-items:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@keyframes sweep{0%,100%{transform:rotate(-38deg)}50%{transform:rotate(38deg)}}
+@keyframes rise{from{transform:translateY(0);opacity:.9}to{transform:translateY(-40cqw);opacity:0}}
+@keyframes wave{0%,100%{transform:skewY(-4deg) translateX(-2%)}50%{transform:skewY(3deg) translateX(2%)}}
+@keyframes drift{0%,100%{transform:translateX(-3%)}50%{transform:translateX(3%)}}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><button id="copy">Copy my picks</button></div></div>
+<script>
+/* ---------- fonts (all in fonts/, latin only) ---------- */
+const FONTS={"Cinzel Decorative":"cinzel-decorative-700","Uncial Antiqua":"uncial-antiqua-400","Fraunces":"fraunces-600",
+"Jersey 10":"jersey-10-400","Press Start 2P":"press-start-2p-400","Silkscreen":"silkscreen-700",
+"Cormorant Garamond":"cormorant-garamond-700","Marcellus":"marcellus-400","Philosopher":"philosopher-700",
+"Pirata One":"pirata-one-400","Grenze Gotisch":"grenze-gotisch-700","IM Fell English":"im-fell-english-400",
+"Lilita One":"lilita-one-400","Chewy":"chewy-400","Bubblegum Sans":"bubblegum-sans-400",
+"Righteous":"righteous-400","Racing Sans One":"racing-sans-one-400","Shrikhand":"shrikhand-400",
+"Pacifico":"pacifico-400","VT323":"vt323-400","Monoton":"monoton-400",
+"Graduate":"graduate-400","Bungee":"bungee-400","Bowlby One SC":"bowlby-one-sc-400",
+"El Messiri":"el-messiri-700","Aref Ruqaa":"aref-ruqaa-700","Marhey":"marhey-600"};
+document.getElementById('ff').textContent=Object.entries(FONTS).map(([n,f])=>`@font-face{font-family:"${n}";src:url(fonts/${f}.woff2) format("woff2");font-display:block}`).join('\n');
+
+/* ---------- each game's start screen scene (its G5.21 scene, sketched in CSS) ---------- */
+const S={
+pixel:`<div class="sc" style="inset:0;background:linear-gradient(#0c1030,#1a1d4a 55%,#2b2350 80%,#1a1430)"></div><div class="sc stars"></div>
+<div class="sc" style="left:-10%;right:-10%;top:12%;height:22%;background:linear-gradient(90deg,transparent,rgba(90,230,170,.28),rgba(120,200,255,.22),rgba(170,110,240,.2),transparent);filter:blur(6px);animation:wave 9s ease-in-out infinite"></div>
+<div class="sc" style="right:12%;top:9%;width:9cqw;height:9cqw;border-radius:50%;box-shadow:inset -2.2cqw 0 0 0 #e8e2c8"></div>
+<div class="sc" style="left:-10%;right:-10%;bottom:-12%;height:34%;border-radius:50% 50% 0 0;background:#191230"></div>
+<div class="sc" style="left:46%;bottom:18%;width:1cqw;height:15cqw;background:#2b2233"></div><div class="sc" style="left:44%;bottom:30%;width:4cqw;height:5cqw;background:#f7d48a;box-shadow:0 0 6cqw 3cqw rgba(247,200,120,.35)"></div>
+<div class="sc" style="left:40%;bottom:14%;width:7cqw;height:5cqw;background:#7a4d2a;border-top:1.2cqw solid #a8713c"></div>`,
+blg:`<div class="sc" style="inset:0;background:linear-gradient(#1d2a5c 0%,#4a3a72 30%,#c97a86 55%,#f7c98a 70%)"></div>
+<div class="sc" style="left:0;right:0;bottom:30%;height:30%;background:#3a2d5c;clip-path:polygon(0 100%,14% 30%,26% 70%,42% 5%,57% 60%,70% 20%,86% 75%,100% 35%,100% 100%)"></div>
+<div class="sc" style="left:-10%;right:-10%;bottom:20%;height:16%;background:radial-gradient(ellipse at 20% 60%,#fbe8e0 0 30%,transparent 31%),radial-gradient(ellipse at 55% 50%,#f6dbd6 0 32%,transparent 33%),radial-gradient(ellipse at 85% 60%,#fbe8e0 0 30%,transparent 31%);animation:drift 10s ease-in-out infinite"></div>
+<div class="sc" style="left:0;right:0;bottom:0;height:22%;background:linear-gradient(#5b8a4a,#35552e)"></div>
+<div class="sc" style="left:18%;bottom:14%;width:.8cqw;height:9cqw;background:#3a2a1d"></div><div class="sc" style="left:17.2%;bottom:22%;width:2.4cqw;height:2.8cqw;background:#ffd890;border-radius:.4cqw;box-shadow:0 0 4cqw 1.5cqw rgba(255,210,130,.5)"></div>`,
+keeper:`<div class="sc" style="inset:0;background:linear-gradient(#070b1e,#141c3e 52%,#0c2034 53%,#06111c)"></div><div class="sc stars"></div>
+<div class="sc" style="left:62%;bottom:40%;width:0;height:0;transform-origin:0 0;animation:sweep 8s ease-in-out infinite"><div style="position:absolute;left:0;top:0;width:60cqw;height:12cqw;transform:translateY(-50%);background:linear-gradient(90deg,rgba(255,226,150,.55),transparent);clip-path:polygon(0 45%,100% 0,100% 100%,0 55%)"></div></div>
+<div class="sc" style="left:58%;bottom:28%;width:9cqw;height:7cqw;border-radius:50% 50% 0 0;background:#1d2230"></div><div class="sc" style="left:61%;bottom:34%;width:2.4cqw;height:12cqw;background:#cfc3a6"></div><div class="sc" style="left:60.6%;bottom:45%;width:3.2cqw;height:2.4cqw;background:#ffe39a;box-shadow:0 0 5cqw 2cqw rgba(255,220,140,.55)"></div>`,
+hbd:`<div class="sc" style="inset:0;background:linear-gradient(#2a2050 0%,#6a3f6e 35%,#d0784e 60%,#f0a35e 72%)"></div>
+<div class="sc" style="left:0;right:0;bottom:0;height:45%;background:#1c1530;clip-path:polygon(0 100%,0 30%,5% 0,10% 30%,14% 10%,19% 35%,25% 5%,31% 40%,70% 40%,74% 8%,79% 35%,84% 0,89% 30%,94% 12%,100% 35%,100% 100%)"></div>
+<div class="sc" style="left:44%;bottom:12%;width:14cqw;height:11cqw;background:#2a1f3a;clip-path:polygon(0 40%,50% 0,100% 40%,100% 100%,0 100%)"></div><div class="sc" style="left:48.5%;bottom:15%;width:3.4cqw;height:3.4cqw;background:#ffc76a;box-shadow:0 0 5cqw 2cqw rgba(255,190,100,.5)"></div>
+<div class="sc" style="left:53.5%;bottom:24%;width:3cqw;height:3cqw;border-radius:50%;background:rgba(220,210,230,.35);filter:blur(3px);animation:rise 7s linear infinite"></div><div class="sc" style="left:54%;bottom:24%;width:3.4cqw;height:3.4cqw;border-radius:50%;background:rgba(220,210,230,.3);filter:blur(3px);animation:rise 7s linear 3.5s infinite"></div>`,
+tt:`<div class="sc" style="inset:0;background:linear-gradient(#1b86b2,#145f8c 45%,#0b3554 80%,#082a40)"></div>
+<div class="sc" style="left:10%;top:-10%;width:10%;height:120%;background:linear-gradient(rgba(255,255,255,.22),transparent);transform:skewX(-14deg)"></div><div class="sc" style="left:42%;top:-10%;width:6%;height:120%;background:linear-gradient(rgba(255,255,255,.18),transparent);transform:skewX(-14deg)"></div><div class="sc" style="left:70%;top:-10%;width:9%;height:120%;background:linear-gradient(rgba(255,255,255,.2),transparent);transform:skewX(-14deg)"></div>
+<div class="sc" style="left:0;right:0;bottom:0;height:22%;background:#0a2234;clip-path:polygon(0 100%,0 40%,20% 55%,32% 20%,40% 20%,40% 0,46% 0,46% 20%,56% 20%,62% 50%,80% 35%,100% 55%,100% 100%)"></div>
+<div class="sc" style="left:24%;bottom:20%;width:1.6cqw;height:1.6cqw;border-radius:50%;border:2px solid rgba(255,255,255,.6);animation:rise 6s linear infinite"></div><div class="sc" style="left:72%;bottom:24%;width:1.1cqw;height:1.1cqw;border-radius:50%;border:2px solid rgba(255,255,255,.6);animation:rise 5s linear 2s infinite"></div>`,
+tsr:`<div class="sc" style="inset:0;background:linear-gradient(#8fb7d6 0%,#f2c48a 45%,#f39a5b 62%)"></div>
+<div class="sc" style="left:0;right:0;bottom:28%;height:30%;background:#8c7aa6;clip-path:polygon(0 100%,0 50%,18% 10%,34% 55%,52% 0,70% 45%,86% 15%,100% 50%,100% 100%)"></div>
+<div class="sc" style="left:0;right:0;bottom:0;height:34%;background:linear-gradient(#5d7b4a,#3f5a36);clip-path:polygon(0 30%,30% 10%,60% 25%,100% 5%,100% 100%,0 100%)"></div>
+<div class="sc" style="left:20%;bottom:-8%;width:60%;height:34%;border:2.2cqw solid #d9c9a4;border-color:#d9c9a4 transparent transparent transparent;border-radius:50%"></div><div class="sc" style="left:70%;bottom:20%;width:6cqw;height:2.4cqw;background:#c0392b;border-radius:.8cqw"></div>`,
+lfl:`<div class="sc" style="inset:0;background:linear-gradient(#7d6fc0 0%,#c79ac8 30%,#f6b48f 52%)"></div>
+<div class="sc" style="left:-5%;right:-5%;bottom:0;height:44%;background:repeating-linear-gradient(90deg,#5f9a5a 0 10%,#57905a 10% 20%)"></div>
+<div class="sc" style="left:35%;bottom:6%;width:30%;height:22%;border:.4cqw solid rgba(255,255,255,.75);border-radius:50%"></div><div class="sc" style="left:49.2%;bottom:16%;width:1.8cqw;height:1.8cqw;border-radius:50%;background:#fff;box-shadow:0 .3cqw 0 rgba(0,0,0,.3)"></div>
+<div class="sc" style="left:8%;bottom:44%;width:.6cqw;height:18cqw;background:#3b3550"></div><div class="sc" style="left:6.5%;bottom:62%;width:4cqw;height:2cqw;background:#fff3c8;box-shadow:0 0 5cqw 2cqw rgba(255,240,190,.4)"></div><div class="sc" style="right:8%;bottom:44%;width:.6cqw;height:18cqw;background:#3b3550"></div><div class="sc" style="right:6.5%;bottom:62%;width:4cqw;height:2cqw;background:#fff3c8;box-shadow:0 0 5cqw 2cqw rgba(255,240,190,.4)"></div>`,
+ttf:`<div class="sc" style="inset:0;background:linear-gradient(#070d1c,#13213a 60%)"></div><div class="sc stars"></div>
+<div class="sc" style="left:0;right:0;bottom:30%;height:22%;background:#1b2436;clip-path:polygon(0 100%,0 20%,100% 0,100% 100%)"></div>
+<div class="sc" style="left:0;right:0;bottom:0;height:32%;background:repeating-linear-gradient(90deg,#2f7d3c 0 8%,#2a7036 8% 16%)"></div>
+<div class="sc" style="left:46%;bottom:10%;width:.8cqw;height:16cqw;background:#ffd23a"></div><div class="sc" style="left:40%;bottom:24%;width:14cqw;height:.8cqw;background:#ffd23a"></div><div class="sc" style="left:40%;bottom:24%;width:.8cqw;height:9cqw;background:#ffd23a"></div><div class="sc" style="left:53.2%;bottom:24%;width:.8cqw;height:9cqw;background:#ffd23a"></div>
+<div class="sc" style="left:6%;top:16%;width:8cqw;height:3cqw;background:#fffbe6;box-shadow:0 0 8cqw 4cqw rgba(255,250,220,.35)"></div><div class="sc" style="right:6%;top:16%;width:8cqw;height:3cqw;background:#fffbe6;box-shadow:0 0 8cqw 4cqw rgba(255,250,220,.35)"></div>
+<div class="sc" style="left:70%;top:14%;width:10cqw;height:10cqw;border-radius:50%;background:radial-gradient(circle,rgba(255,120,90,.9) 0 6%,transparent 8%),conic-gradient(from 0deg,rgba(255,190,90,.8) 0 3%,transparent 3% 12.5%,rgba(255,190,90,.8) 12.5% 15.5%,transparent 15.5% 25%,rgba(255,190,90,.8) 25% 28%,transparent 28% 37.5%,rgba(255,190,90,.8) 37.5% 40.5%,transparent 40.5% 50%,rgba(255,190,90,.8) 50% 53%,transparent 53% 62.5%,rgba(255,190,90,.8) 62.5% 65.5%,transparent 65.5% 75%,rgba(255,190,90,.8) 75% 78%,transparent 78% 87.5%,rgba(255,190,90,.8) 87.5% 90.5%,transparent 90.5%);-webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%)"></div>`,
+sd:`<div class="sc" style="inset:0;background:linear-gradient(#2a3470 0%,#7a4a6a 25%,#e0876a 45%,#f3b77a 60%)"></div>
+<div class="sc" style="left:58%;top:40%;width:12cqw;height:12cqw;border-radius:50%;background:#ffe2a6;box-shadow:0 0 8cqw 3cqw rgba(255,210,150,.5)"></div>
+<div class="sc" style="left:-10%;right:-10%;bottom:12%;height:30%;background:#d38a5a;border-radius:60% 40% 0 0"></div><div class="sc" style="left:-20%;right:20%;bottom:-6%;height:30%;background:#b86e46;border-radius:50% 60% 0 0"></div><div class="sc" style="left:40%;right:-20%;bottom:-10%;height:28%;background:#9c5a3a;border-radius:55% 45% 0 0"></div>
+<div class="sc" style="left:20%;top:52%;width:10cqw;height:2cqw;background:linear-gradient(90deg,#3f7f7a,#b0603f);border-radius:40%;transform:skewX(-20deg);animation:drift 6s ease-in-out infinite"></div>`};
+
+const GAME={pixel:{n:"Pixel Hollow",t:"A quiet treasure hunt",c:"#f2c46a",g:"rgba(255,190,100,.7)"},
+blg:{n:"By Lantern's Glow",t:"A no-combat journey through meadows, peaks, and memories",c:"#fff0c2",g:"rgba(255,186,92,.75)"},
+keeper:{n:"Keeper of the Hollow",t:"A cozy quest",c:"#f2c46a",g:"rgba(255,200,110,.7)"},
+hbd:{n:"Home by Dusk",t:"A calm, spooky painted adventure",c:"#ffe2b0",g:"rgba(255,170,100,.75)"},
+tt:{n:"Tiny Tailwind",t:"A twin-stick adventure",c:"#ffd84a",g:"rgba(255,230,130,.7)"},
+tsr:{n:"The Scenic Route",t:"A calm rally drive",c:"#fff1d0",g:"rgba(255,190,100,.75)"},
+lfl:{n:"Lo-Fi League",t:"Laid-back 7 a side soccer",c:"#fff4e6",g:"rgba(255,180,120,.8)"},
+ttf:{n:"Tiny Titans Football",t:"Arcade 7 on 7 and 11 on 11 football",c:"#ffd23a",g:"rgba(255,215,90,.7)"},
+sd:{n:"Saffron Drift",t:"Ride the quiet desert",c:"#fff0d6",g:"rgba(255,170,90,.8)"}};
+
+const SPORT={ttf:1,lfl:1};
+function ui(k,font,extra){const g=GAME[k];return `<div class="ui"><div class="sky"><div class="ttl" style="font-family:'${font}';color:${g.c};--glow:${g.g};${extra||''}">${g.n}</div><div class="tag">${g.t}</div></div><div class="low"><div class="keys">Left stick to move. A to pick up. Menu for options.</div><div class="btn">Continue</div><div class="btn">Play</div><div class="btn ghost">Settings</div><div class="ver">Version 0.20.0</div></div></div>`}
+function stage(k,font,extra){return `<div class="stage">${`<div class="sc" style="inset:0">${S[k]}</div>`}${ui(k,font,extra)}</div>`}
+function pair(cls,font){return `<div class="pair ${cls}"><div class="phone"><div class="sc" style="inset:0">${S.pixel}</div>${ui('pixel',font)}</div><div class="land"><div class="sc" style="inset:0">${S.pixel}</div>${ui('pixel',font)}</div></div>`}
+
+const OFL="Free to ship in the game (SIL Open Font License).";
+const DECISION={
+ title:"Start screen titles: where they sit and which font each game uses",
+ intro:"Today most titles sit small at the top in the engine's default font. Pick one placement for every game, then one title font per game. Each preview is that game's own start screen scene with the title in the new spot and the new font.",
+ note:"Only the title changes font. The tag line, buttons, controls line and version stay in the shared font so menus look the same in every game (G5.21). No two games share a title font. The game page and Game Shelf card name use the same font as the start screen (G1.13). Previews are landscape at 800 x 600. The phone view in Question 1 shows portrait. When you paste your picks, I write the new standard into GAME_STANDARDS.md, add the fonts to each game and ship the change to all 9 games.",
+ label:"Title picks",
+ questions:[
+ {id:"layout",name:"1. Title placement (all games)",sub:"Shown with Pixel Hollow on a phone held upright and on a wide screen. Size grows too: the title fills up to about 80 percent of the screen width.",
+  options:[
+   {title:"Middle of the open sky",meta:["The title and tag line sit centered in the open space above the buttons. On a wide phone the title centers on the left and the buttons sit on the right.","Keeps the scene's hero motion visible above and below the title."],html:pair('mid','Jersey 10'),rec:true},
+   {title:"Dead center of the screen",meta:["The title sits at the exact middle of the screen. The buttons stay at the bottom.","On a phone held upright this leaves a big gap between the title and the buttons."],html:pair('center','Jersey 10')},
+   {title:"Today, for comparison",meta:["Title small and at the top, as in your screenshot.","Pick this only to keep things as they are."],html:pair('today','Courier New')}]},
+ {id:"keeper",name:"2. Keeper of the Hollow",sub:"Zelda-like toy diorama, storybook journal menus, the Waylight at night.",
+  options:[
+   {title:"Cinzel Decorative",meta:["Carved, old-kingdom capitals. Reads like a legend on a stone gate.",OFL],font:"Cinzel Decorative",rec:true},
+   {title:"Uncial Antiqua",meta:["Hand-lettered storybook style with a Celtic feel. Fits the Thimblefolk and the hobbit-style quest.",OFL],font:"Uncial Antiqua"},
+   {title:"Fraunces (today's title font)",meta:["Soft, bookish serif. Already in the game, so the only change is the new placement.",OFL],font:"Fraunces"}]},
+ {id:"pixel",name:"3. Pixel Hollow",sub:"Pixel art night on Lantern Hill with a pixel aurora.",
+  options:[
+   {title:"Jersey 10",meta:["Tall, warm pixel letters. Easy to read big or small.",OFL],font:"Jersey 10",rec:true},
+   {title:"Press Start 2P",meta:["Classic 8-bit arcade lettering. Wide, so the title wraps to two lines on a narrow phone.",OFL],font:"Press Start 2P",extra:"font-size:6.4cqw"},
+   {title:"Silkscreen",meta:["Clean, blocky pixel capitals. Calm and tidy.",OFL],font:"Silkscreen",extra:"font-size:8.6cqw"}]},
+ {id:"blg",name:"4. By Lantern's Glow",sub:"Dawn over the peaks and a sea of clouds. The plain HTML game.",
+  options:[
+   {title:"Cormorant Garamond",meta:["Elegant, airy book serif. Feels like the first page of a journal.",OFL],font:"Cormorant Garamond",rec:true},
+   {title:"Marcellus",meta:["Calm, carved capitals with a classic travel-poster feel.",OFL],font:"Marcellus"},
+   {title:"Philosopher",meta:["Gentle, slightly old-world letters. Friendly at small sizes.",OFL],font:"Philosopher"}]},
+ {id:"hbd",name:"5. Home by Dusk",sub:"Calm but spooky painted storybook, Castlevania in spirit.",
+  options:[
+   {title:"Pirata One",meta:["Readable gothic blackletter. Castlevania mood without being hard to read.",OFL],font:"Pirata One",rec:true},
+   {title:"Grenze Gotisch",meta:["Sharper, heavier gothic. The spookiest of the three.",OFL],font:"Grenze Gotisch"},
+   {title:"IM Fell English",meta:["Old printed storybook type. Leans painted fairy tale over gothic.",OFL],font:"IM Fell English"}]},
+ {id:"tt",name:"6. Tiny Tailwind",sub:"Toy-render undersea dragon palace with the manta ship.",
+  options:[
+   {title:"Lilita One",meta:["Chunky, rounded toy-box letters. Matches the toy-render look.",OFL],font:"Lilita One",rec:true},
+   {title:"Chewy",meta:["Soft, bouncy cartoon letters. Playful and light.","Free to ship in the game (Apache 2.0 license)."],font:"Chewy"},
+   {title:"Bubblegum Sans",meta:["Bubbly, friendly hand-drawn letters. Fits the bubbles and sea life.",OFL],font:"Bubblegum Sans"}]},
+ {id:"tsr",name:"7. The Scenic Route",sub:"Calm rally drive through golden-hour mountain roads, art of rally style.",
+  options:[
+   {title:"Righteous",meta:["Rounded 70s lettering, like a vintage rally decal.",OFL],font:"Righteous",rec:true},
+   {title:"Racing Sans One",meta:["Slanted motorsport letters. Sportier and faster in feel.",OFL],font:"Racing Sans One"},
+   {title:"Shrikhand",meta:["Bold retro script-style italic. Warm road-trip postcard vibe.",OFL],font:"Shrikhand",extra:"font-size:8.6cqw"}]},
+ {id:"lfl",name:"8. Lo-Fi League",sub:"Chill sunset pitch, lo-fi music and mood.",
+  options:[
+   {title:"Pacifico",meta:["Relaxed brush script. Sunset and headphones energy.",OFL],font:"Pacifico",extra:"font-size:9.5cqw"},
+   {title:"VT323",meta:["Old VHS and cassette-deck lettering. Pure lo-fi tape feel.",OFL],font:"VT323",rec:true,extra:"font-size:13cqw"},
+   {title:"Monoton",meta:["Neon-tube outline letters. A retro sign over the stadium.",OFL],font:"Monoton",extra:"font-size:8.6cqw"}]},
+ {id:"ttf",name:"9. Tiny Titans Football",sub:"Arcade football under the stadium lights.",
+  options:[
+   {title:"Graduate",meta:["Varsity jersey block letters. Reads football at a glance.",OFL],font:"Graduate",rec:true,extra:"font-size:7.4cqw"},
+   {title:"Bungee",meta:["Loud, stacked arcade-sign letters. Most arcade of the three.",OFL],font:"Bungee",extra:"font-size:6.8cqw"},
+   {title:"Bowlby One SC",meta:["Heavy, wide capitals like a TV sports broadcast.",OFL],font:"Bowlby One SC",extra:"font-size:6.6cqw"}]},
+ {id:"sd",name:"10. Saffron Drift",sub:"Calm magic carpet ride across the dusk desert.",
+  options:[
+   {title:"El Messiri",meta:["Clean letters drawn with an Arabic-script flavor. Desert without the cliché.",OFL],font:"El Messiri",rec:true},
+   {title:"Aref Ruqaa",meta:["Calligraphic serif with soft brush strokes. More storybook.",OFL],font:"Aref Ruqaa"},
+   {title:"Marhey",meta:["Rounded, playful letters with a market-sign feel. Youngest in tone.",OFL],font:"Marhey"}]}]};
+
+const $=s=>document.querySelector(s),picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+ const sec=document.createElement('section');
+ sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+ sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+ q.options.forEach((o,i)=>{
+  const c=document.createElement('div');c.className='card';
+  c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+  c.querySelector('h3').textContent=o.title;
+  for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+  const box=document.createElement('div');box.innerHTML=o.html||stage(q.id,o.font,o.extra);c.appendChild(box);
+  const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+  b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]=Object.assign(picks[q.id]||{},{q:q.name.replace(/^\d+\.\s*/,''),o:o.title});draw()};
+  sec.querySelector('.grid').appendChild(c)});
+ sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name.replace(/^\d+\.\s*/,''),o:''}).n=e.target.value;draw()};
+ $('#main').appendChild(sec)}
+/* shrink any title that runs past 86% of its screen so long names stay on one line */
+function fit(){document.querySelectorAll('.ttl').forEach(t=>{const w=t.parentElement.clientWidth*.86;let s=parseFloat(getComputedStyle(t).fontSize),n=0;while(t.scrollWidth>w&&n++<40){s*=.95;t.style.fontSize=s+'px'}})}
+document.fonts.ready.then(fit);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name.replace(/^\d+\.\s*/,'')+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
