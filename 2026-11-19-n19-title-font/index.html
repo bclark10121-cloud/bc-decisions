@@ -49,8 +49,8 @@ function screen(fam){
     // title dead center, above the buttons (G5.21 Title)
     let size=96;g.font=`${size}px "${fam}"`;while(g.measureText('SUNSET STATIC').width>w*0.82&&size>30){size-=2;g.font=`${size}px "${fam}"`}
     g.textAlign='center';g.textBaseline='middle';
-    g.shadowColor='#ff2e88';g.shadowBlur=26+8*Math.sin(t*3.2);g.fillStyle='#ffffff';g.fillText('SUNSET STATIC',cx,h*0.42);
-    g.shadowColor='#22e3ff';g.shadowBlur=10;g.font=`22px "${fam}"`;g.fillStyle='#22e3ff';g.fillText('ride the neon grid',cx,h*0.42+size*0.72);g.shadowBlur=0;
+    g.shadowColor='#ff2e88';g.shadowBlur=26+8*Math.sin(t*3.2);g.fillStyle='#ffffff';g.fillText('SUNSET STATIC',cx,h*0.2);
+    g.shadowColor='#22e3ff';g.shadowBlur=10;g.font=`22px "${fam}"`;g.fillStyle='#22e3ff';g.fillText('ride the neon grid',cx,h*0.2+size*0.7);g.shadowBlur=0;
     // buttons along the bottom
     g.font='600 18px Inter, sans-serif';
     ['Play','Settings'].forEach((b,i)=>{const bw=150,bx=cx-bw-10+i*(bw+20),by=h-62;g.fillStyle='rgba(13,8,28,0.85)';g.fillRect(bx,by,bw,40);g.strokeStyle=i==0?'#ff2e88':'#22e3ff';g.lineWidth=2;g.strokeRect(bx,by,bw,40);g.fillStyle='#fff';g.fillText(b,bx+bw/2,by+21)});
@@ -59,7 +59,7 @@ function screen(fam){
 SCENES.a=screen('F-audiowide');SCENES.b=screen('F-orbitron');SCENES.c=screen('F-tiltneon');
 const DECISION = {
   title: "Sunset Static title font: pick one",
-  intro: "The start screen title font for Sunset Static (G5.21 Title). Each card shows the name dead center above the buttons on a moving neon start screen. No other game of yours uses any of these three fonts.",
+  intro: "The start screen title font for Sunset Static (G5.21 Title). Each card shows the name high on a moving neon start screen, clear of the sun (BC, 2026-11-19: moved up). No other game of yours uses any of these three fonts.",
   note: "All three are free Google Fonts under the SIL Open Font License, shipped beside this page (Latin letters only). The scene, the tag line and the buttons are stand-ins. The real start screen scene and title track come later. After you paste your pick, the font goes into the N19 brief, the plan and the future game page and Game Shelf card.",
   label: "Sunset Static title font picks",
   questions: [
