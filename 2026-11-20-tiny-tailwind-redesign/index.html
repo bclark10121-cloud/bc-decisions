@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tiny Tailwind redesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     push it to bclark10121-cloud/bc-decisions as <date>-<topic>/index.html, add it to that repo's index.html
+     open https://bclark10121-cloud.github.io/bc-decisions/<date>-<topic>/ in a NEW full-width browser tab
+     and put that full link in the reply. Never as a Claude artifact. BC picks, presses Copy my picks and pastes the text in chat. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;max-width:800px;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+
+const SCENES = {};
+function sea(g,w,h,top,bot){const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,w,h)}
+function rays(g,t,w,h,col){g.globalCompositeOperation='lighter';for(let i=0;i<6;i++){const x=((i*170+t*14)%(w+300))-150;g.fillStyle=col;g.beginPath();g.moveTo(x,0);g.lineTo(x+60,0);g.lineTo(x+220,h);g.lineTo(x+120,h);g.fill()}g.globalCompositeOperation='source-over'}
+function bubbles(g,t,w,h,col){for(let i=0;i<26;i++){const x=(i*97)%w+Math.sin(t*1.3+i)*8,y=h-((t*40+i*53)%(h+40));g.strokeStyle=col;g.lineWidth=2;g.beginPath();g.arc(x,y,3+i%4,0,7);g.stroke()}}
+function kelp(g,t,x,base,hgt,col){g.strokeStyle=col;g.lineWidth=10;g.lineCap='round';g.beginPath();g.moveTo(x,base);for(let k=1;k<=8;k++){g.lineTo(x+Math.sin(t*1.6+k*0.7+x)*10*k/4,base-hgt*k/8)}g.stroke()}
+function manta(g,t,x,y,s,a){g.save();g.translate(x,y);g.rotate(a);g.scale(s,s);const f=Math.sin(t*4)*0.12;
+ g.fillStyle='#0003';g.beginPath();g.ellipse(10,12,34,40,0,0,7);g.fill();
+ g.fillStyle='#7cc8f2';for(const sd of [-1,1]){g.beginPath();g.moveTo(22,0);g.quadraticCurveTo(10,sd*30,-14,sd*(48+f*40));g.quadraticCurveTo(-8,sd*18,-24,0);g.closePath();g.fill()}
+ g.fillStyle='#5aa9d8';g.beginPath();g.ellipse(0,0,24,13,0,0,7);g.fill();g.fillStyle='#f28a2e';g.beginPath();g.ellipse(6,0,12,11,0,0,7);g.fill();
+ g.fillStyle='#2b5d8a';g.beginPath();g.arc(9,0,5,0,7);g.fill();g.fillStyle='#f28a2e';for(const sd of [-1,1]){g.beginPath();g.ellipse(20,sd*9,6,3,sd*0.5,0,7);g.fill()}
+ g.strokeStyle='#f28a2e';g.lineWidth=3;g.lineCap='round';g.beginPath();g.moveTo(-22,0);g.lineTo(-50,Math.sin(t*6)*4);g.stroke();g.restore()}
+function shotsRow(g,t,x0,y,cols,n){for(let i=0;i<n;i++){const x=x0+((t*260+i*90)%420);g.fillStyle=cols[0];g.beginPath();g.arc(x,y,11,0,7);g.fill();g.fillStyle=cols[1];g.beginPath();g.arc(x,y,6,0,7);g.fill()}}
+function label(g,txt,w){const h=g.canvas.height;g.fillStyle='#0009';g.fillRect(0,h-40,w,40);g.fillStyle='#fff';g.font='600 18px Inter,sans-serif';g.textAlign='left';g.fillText(txt,16,h-14)}
+function roof(g,x,y,wd,col,trim){g.fillStyle=col;g.beginPath();g.moveTo(x-wd*0.62,y);g.quadraticCurveTo(x,y-wd*0.18,x,y-wd*0.32);g.quadraticCurveTo(x,y-wd*0.18,x+wd*0.62,y);g.fill();g.fillStyle=trim;g.fillRect(x-wd*0.5,y,wd,8)}
+function lantern(g,t,x,y,s,glow){if(glow){const r=g.createRadialGradient(x,y,2,x,y,46*s);r.addColorStop(0,'#ffb46088');r.addColorStop(1,'#ffb46000');g.fillStyle=r;g.beginPath();g.arc(x,y,46*s,0,7);g.fill()}g.fillStyle='#d8332b';g.beginPath();g.ellipse(x,y+Math.sin(t*2+x)*3,12*s,15*s,0,0,7);g.fill();g.fillStyle='#f2c14e';g.fillRect(x-5*s,y-17*s,10*s,4*s);g.fillRect(x-5*s,y+13*s,10*s,4*s)}
+SCENES.look_a=(g,t,w,h)=>{sea(g,w,h,'#5fd6e8','#1c8fb0');rays(g,t,w,h,'#ffffff14');
+ g.fillStyle='#f6e2b0';g.beginPath();g.moveTo(0,h);g.quadraticCurveTo(w*0.3,h-90,w*0.6,h-60);g.quadraticCurveTo(w*0.85,h-40,w,h-80);g.lineTo(w,h);g.fill();
+ g.fillStyle='#b8232b';g.fillRect(470,250,20,180);g.fillRect(630,250,20,180);roof(g,560,250,260,'#2f9e7a','#e3b341');roof(g,560,170,180,'#2f9e7a','#e3b341');g.fillStyle='#c9302c';g.fillRect(500,300,120,8);
+ for(const [x,c] of [[90,'#ff7b6b'],[200,'#ffb347'],[330,'#ff8fb1'],[720,'#ff7b6b']]){g.fillStyle=c;for(let k=0;k<5;k++){g.beginPath();g.arc(x+Math.cos(k)*26,h-110-k*16,16-k*2,0,7);g.fill()}}
+ kelp(g,t,40,h,260,'#2e9c5a');kelp(g,t,770,h,220,'#2e9c5a');lantern(g,t,470,240,1,false);lantern(g,t,650,240,1,false);
+ manta(g,t,260+Math.sin(t*0.8)*60,330+Math.cos(t)*30,1.15,Math.sin(t*0.8)*0.4);shotsRow(g,t,330,330+Math.cos(t)*30,['#ffb43a','#fff3c4'],3);bubbles(g,t,w,h,'#ffffffaa');label(g,'Sunlit coral palace: bright, readable, toy render',w)};
+SCENES.look_b=(g,t,w,h)=>{sea(g,w,h,'#1b3a6b','#0a1430');rays(g,t,w,h,'#7fb4ff0d');
+ g.fillStyle='#16304f';g.beginPath();g.moveTo(0,h);g.lineTo(0,h-120);g.quadraticCurveTo(200,h-180,380,h-110);g.quadraticCurveTo(600,h-60,w,h-150);g.lineTo(w,h);g.fill();
+ g.fillStyle='#2a5a52';g.fillRect(520,220,180,230);roof(g,610,220,260,'#1f4a44','#c99a2e');for(let i=0;i<3;i++){g.fillStyle='#ffd27a'+(Math.sin(t*2+i)>0?'cc':'88');g.fillRect(545+i*55,280,26,40)}
+ for(let i=0;i<8;i++)lantern(g,t,60+i*95,90+Math.sin(i)*40,0.9,true);kelp(g,t,120,h,300,'#1f6b5a');kelp(g,t,460,h,240,'#1f6b5a');
+ for(let i=0;i<10;i++){const x=(i*130+t*30)%w,y=200+((i*71)%200);g.fillStyle='#9ff7ff';g.globalAlpha=0.5+0.5*Math.sin(t*3+i);g.beginPath();g.arc(x,y,3,0,7);g.fill();g.globalAlpha=1}
+ manta(g,t,260+Math.sin(t*0.8)*60,330+Math.cos(t)*30,1.15,Math.sin(t*0.8)*0.4);shotsRow(g,t,330,330+Math.cos(t)*30,['#ffb43a','#fff3c4'],3);bubbles(g,t,w,h,'#9fd8ff88');label(g,'Twilight lantern sea: moody, glowing, darker',w)};
+SCENES.look_c=(g,t,w,h)=>{sea(g,w,h,'#eef3f7','#cfdcea');g.strokeStyle='#2b5aa833';g.lineWidth=2;for(let y=60;y<h;y+=34){g.beginPath();for(let x=0;x<=w;x+=20)g.lineTo(x,y+Math.sin(x/50+t*1.2+y)*5);g.stroke()}
+ g.strokeStyle='#2b5aa8';g.lineWidth=4;g.fillStyle='#ffffffcc';for(const [x,y,r] of [[140,420,90],[680,460,120],[420,520,70]]){g.beginPath();g.arc(x,y,r,Math.PI,0);g.fill();g.stroke();for(let k=1;k<4;k++){g.beginPath();g.arc(x,y,r-k*20,Math.PI,0);g.stroke()}}
+ g.fillStyle='#2b5aa8';g.fillRect(500,240,16,140);g.fillRect(620,240,16,140);roof(g,568,240,230,'#2b5aa8','#2b5aa8');
+ g.strokeStyle='#2b5aa8';g.lineWidth=3;for(let i=0;i<5;i++){g.beginPath();g.arc(300+i*30,200,8+Math.sin(t*2+i)*2,0,7);g.stroke()}
+ manta(g,t,260+Math.sin(t*0.8)*60,330+Math.cos(t)*30,1.15,Math.sin(t*0.8)*0.4);shotsRow(g,t,330,330+Math.cos(t)*30,['#ffb43a','#fff3c4'],3);label(g,'Porcelain blue: ink lines on cream, calm and unusual',w)};
+function storyBase(g,t,w,h){sea(g,w,h,'#3fb8d6','#14627f');rays(g,t,w,h,'#ffffff12');g.fillStyle='#e8d3a0';g.fillRect(0,h-70,w,70)}
+SCENES.story_a=(g,t,w,h)=>{storyBase(g,t,w,h);const cx=400,cy=250;const r=g.createRadialGradient(cx,cy,10,cx,cy,140);r.addColorStop(0,'#fff8e0cc');r.addColorStop(1,'#fff8e000');g.fillStyle=r;g.beginPath();g.arc(cx,cy,140,0,7);g.fill();
+ const sp=Math.min(1,(t%6)/2);for(let i=0;i<5;i++){const a=i/5*Math.PI*2+0.3,d=sp*170;g.fillStyle='#f4f1ff';g.beginPath();g.moveTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);g.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,26,a+0.8,a+3.6);g.fill()}
+ manta(g,t,140+Math.sin(t)*20,420,1,0.2);label(g,'The Lost Pearl: gather the shards of the Dragon King\'s pearl',w)};
+SCENES.story_b=(g,t,w,h)=>{storyBase(g,t,w,h);g.fillStyle='#b8232b';g.fillRect(280,220,20,250);g.fillRect(500,220,20,250);roof(g,400,220,320,'#2f9e7a','#e3b341');
+ g.fillStyle='#fff';g.font='700 34px Inter,sans-serif';for(let i=0;i<3;i++){const k=(t*0.7+i/3)%1;g.globalAlpha=1-k;g.fillText('z',420+k*80+i*10,190-k*120);g.globalAlpha=1}
+ g.fillStyle='#f2c14e';g.beginPath();g.moveTo(385,270);g.lineTo(415,270);g.lineTo(425,330);g.lineTo(375,330);g.fill();manta(g,t,150+Math.sin(t)*20,400,1,0);label(g,'The Sleeping Palace: ring each hall\'s bell to wake the palace',w)};
+SCENES.story_c=(g,t,w,h)=>{storyBase(g,t,w,h);g.fillStyle='#f5e6c4';g.save();g.translate(430,260);g.rotate(-0.06);g.fillRect(-180,-120,360,240);g.strokeStyle='#8a5a2b';g.lineWidth=3;g.setLineDash([10,8]);g.beginPath();g.moveTo(-140,80);g.bezierCurveTo(-60,-60,40,90,140,-70);g.stroke();g.setLineDash([]);
+ for(const [x,y] of [[-140,80],[0,10],[140,-70]]){g.fillStyle='#c9302c';g.beginPath();g.arc(x,y,9,0,7);g.fill()}g.restore();
+ const k=(t*0.4)%1;g.fillStyle='#f5e6c4';g.fillRect(140+k*120,130-k*40,70,50);manta(g,t,140,420,1,-0.2);label(g,'The Tide Map: a light courier tale, map piece by map piece',w)};
+SCENES.shots_a=(g,t,w,h)=>{sea(g,w,h,'#5fd6e8','#1c8fb0');shotsRow(g,t,120,220,['#ffb43a','#fff3c4'],5);shotsRow(g,t,120,300,['#ff7b4a','#fff0e0'],5);for(let i=0;i<6;i++){const x=700-((t*180+i*110)%560);g.fillStyle='#5a1040';g.beginPath();g.arc(x,420,13,0,7);g.fill();g.fillStyle='#d24bff';g.beginPath();g.arc(x,420,9,0,7);g.fill()}label(g,'Player gold and coral. Foes switch to violet',w)};
+SCENES.shots_b=(g,t,w,h)=>{sea(g,w,h,'#5fd6e8','#1c8fb0');for(let i=0;i<5;i++){const x=120+((t*260+i*90)%420);g.strokeStyle='#e3b341';g.lineWidth=4;g.fillStyle='#fffdf4';g.beginPath();g.arc(x,260,11,0,7);g.fill();g.stroke()}for(let i=0;i<6;i++){const x=700-((t*180+i*110)%560);g.fillStyle='#5a1040';g.beginPath();g.arc(x,420,13,0,7);g.fill();g.fillStyle='#ff5fb0';g.beginPath();g.arc(x,420,9,0,7);g.fill()}label(g,'Pearl white with a gold rim. Foes stay pink',w)};
+SCENES.shots_c=(g,t,w,h)=>{sea(g,w,h,'#5fd6e8','#1c8fb0');for(let i=0;i<5;i++){const x=120+((t*260+i*90)%420);g.fillStyle='#0b2a3a';g.beginPath();g.arc(x,260,14,0,7);g.fill();g.fillStyle='#3ad0e8';g.beginPath();g.arc(x,260,10,0,7);g.fill();g.fillStyle='#fffbe0';g.beginPath();g.arc(x,260,5,0,7);g.fill()}for(let i=0;i<6;i++){const x=700-((t*180+i*110)%560);g.fillStyle='#5a1040';g.beginPath();g.arc(x,420,13,0,7);g.fill();g.fillStyle='#ff5fb0';g.beginPath();g.arc(x,420,9,0,7);g.fill()}label(g,'Keep today\'s cyan, add a dark outline',w)};
+SCENES.name_a=(g,t,w,h)=>{sea(g,w,h,'#5fd6e8','#1c8fb0');rays(g,t,w,h,'#ffffff14');bubbles(g,t,w,h,'#ffffffaa');g.textAlign='center';g.fillStyle='#fff7dc';g.strokeStyle='#1f3b63';g.lineWidth=10;g.font='800 64px Georgia,serif';g.strokeText('MANTA QUEST',w/2,250);g.fillText('MANTA QUEST',w/2,250);g.font='600 34px Georgia,serif';g.lineWidth=7;g.strokeText('The Lost Pearl',w/2,305);g.fillStyle='#ffd27a';g.fillText('The Lost Pearl',w/2,305);manta(g,t,w/2+Math.sin(t)*160,430,1,Math.cos(t)*0.3);g.textAlign='left'};
+SCENES.name_b=(g,t,w,h)=>{sea(g,w,h,'#5fd6e8','#1c8fb0');rays(g,t,w,h,'#ffffff14');bubbles(g,t,w,h,'#ffffffaa');g.textAlign='center';g.fillStyle='#fff7dc';g.strokeStyle='#1f3b63';g.lineWidth=10;g.font='800 64px Georgia,serif';g.strokeText('TINY TAILWIND',w/2,250);g.fillText('TINY TAILWIND',w/2,250);g.font='600 34px Georgia,serif';g.lineWidth=7;g.strokeText('The Lost Pearl',w/2,305);g.fillStyle='#ffd27a';g.fillText('The Lost Pearl',w/2,305);manta(g,t,w/2+Math.sin(t)*160,430,1,Math.cos(t)*0.3);g.textAlign='left'};
+const DECISION = {
+  title: "Tiny Tailwind: the undersea story and visual redesign",
+  intro: "Four picks set the direction for the undersea dragon palace redesign. The ship stays the Manta (your pick). After you paste your picks, Gemini makes a real style board in the chosen look, then Meshy models the foes. Nothing in the game changes until you approve that board.",
+  note: "These moving previews are quick sketches drawn in code to show the direction, not the final art. Either name keeps the Android package id, so saves carry over and testers just update. The meadow, Echo Hollow and Thornkeep become a reef, a sea cave and a sunken palace. Every weapon, find and checkpoint keeps working.",
+  label: "Tiny Tailwind redesign picks",
+  questions: [
+    { id: "name", name: "Game name", sub: "What the title card, the game page and The Game Shelf say.",
+      options: [
+        { title: "Manta Quest: The Lost Pearl", meta: ["Your working title from 11/16. A web check today found no game with this name.", "Short app label under the icon: Manta Quest."], media: {draw: "name_a"}, rec: true },
+        { title: "Tiny Tailwind: The Lost Pearl", meta: ["Keeps the name players know. Adds the story as a subtitle.", "Tailwind fits the sky more than the sea."], media: {draw: "name_b"} } ] },
+    { id: "look", name: "World look", sub: "The color and mood of the whole sea. Gemini builds the style board from this pick.",
+      options: [
+        { title: "Sunlit coral palace", meta: ["Bright turquoise water, coral, red lacquer gates and jade roofs.", "Easiest to read on a phone. Fits the toy render look of the Manta."], media: {draw: "look_a"}, rec: true },
+        { title: "Twilight lantern sea", meta: ["Deep navy water lit by red lanterns and glowing fish.", "Moody and pretty. Shots and foes are harder to see on small screens."], media: {draw: "look_b"} },
+        { title: "Porcelain blue", meta: ["Blue ink lines on cream, like painted porcelain.", "Stands out from every other game. Harder to make Meshy art match."], media: {draw: "look_c"} } ] },
+    { id: "story", name: "Story", sub: "Why the Manta explores. Each one keeps calm foes, no lives and nothing lost on defeat.",
+      options: [
+        { title: "The Lost Pearl", meta: ["A storm cracked the Dragon King's pearl, and the currents turned wild. The Manta, youngest palace guardian, gathers the shards.", "Thornhull becomes a crab general made cranky by the dark. Calming him returns the first shard. Ten seas, ten shards."], media: {draw: "story_a"}, rec: true },
+        { title: "The Sleeping Palace", meta: ["The palace and its people fell into an enchanted sleep. Ring each hall's bell to wake it.", "Wren becomes a sea turtle peddler. Quieter and gentler."], media: {draw: "story_b"} },
+        { title: "The Tide Map", meta: ["A light, funny courier tale. Deliver the Dragon King's lost map piece by piece.", "Lots of quirky sea folk to meet. Less epic."], media: {draw: "story_c"} } ] },
+    { id: "shots", name: "Shot colors on blue water", sub: "Today's cyan shots blend into blue water. The top row is yours, the bottom row a foe's.",
+      options: [
+        { title: "Gold and coral", meta: ["Your shots turn warm gold and coral. Foe shots turn violet.", "Clearest on blue water. The Color-safe setting stays."], media: {draw: "shots_a"}, rec: true },
+        { title: "Pearl white with gold rim", meta: ["Your shots look like little pearls. Foe shots stay pink.", "Fits the story. A little less punchy."], media: {draw: "shots_b"} },
+        { title: "Keep cyan, add outline", meta: ["Today's look with a dark ring.", "Least change. Weakest on bright water."], media: {draw: "shots_c"} } ] } ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=800;e.height=600;e.style.cssText='width:100%;max-width:800px;aspect-ratio:4/3;border-radius:10px;margin:8px 0;background:#000;display:block';e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
