@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sunset Static Stage 2 music: pick one</title>
+<style></style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     push it to bclark10121-cloud/bc-decisions as <date>-<topic>/index.html, add it to that repo's index.html
+     open https://bclark10121-cloud.github.io/bc-decisions/<date>-<topic>/ in a NEW full-width browser tab
+     and put that full link in the reply. Never as a Claude artifact. BC picks, presses Copy my picks and pastes the text in chat. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;max-width:800px;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+const SCENES = {};
+const DECISION = {
+  title: "Sunset Static Stage 2 music: pick one",
+  intro: "Play music for Stage 2, Insert Coin, the arcade. Stage 1 keeps Neon Laser Horizon. Each player has the first 75 seconds. All three are bright, bouncy arcade tracks from the Patch.gg library, free to use in your games. Waves and shots lock to whichever beat you pick.",
+  note: "All three are by Kevin MacLeod, CC BY 4.0 (credit on the game page). I measured each tempo from the file, so beat sync stays tight. None of them is used in your other games.",
+  label: "Sunset Static Stage 2 music pick",
+  questions: [
+    { id: "music", name: "Stage 2 play music", sub: "One pick. Add a note if none fits.",
+      options: [
+        { title: "Bit Shift (Kevin MacLeod)", meta: ["Chiptune bleeps over a grooving beat. The most arcade cabinet of the three.", "130 BPM. 3 min 12 s."], media: {audio:"audio/bit_shift.mp3"}, rec: true },
+        { title: "Blip Stream (Kevin MacLeod)", meta: ["Bright, fast and uplifting. The busiest and most energetic.", "150 BPM. 4 min 44 s."], media: {audio:"audio/blip_stream.mp3"} },
+        { title: "Bit Quest (Kevin MacLeod)", meta: ["Bouncy and cheerful, a slower step. The calmest of the three.", "100 BPM. 3 min 12 s."], media: {audio:"audio/bit_quest.mp3"} } ] } ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=800;e.height=600;e.style.cssText='width:100%;max-width:800px;aspect-ratio:4/3;border-radius:10px;margin:8px 0;background:#000;display:block';e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
