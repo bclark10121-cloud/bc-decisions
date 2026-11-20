@@ -30,23 +30,71 @@ textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);bord
 <script>
 // Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
 // sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
-const SCENES = {};
+const SCENES = {
+  // A: the toy room run (the scene in 0.3.0). Marbles roll down from the desk to the bucket.
+  toyroom(g,t,w,h){
+    let gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#f9ecd6');gr.addColorStop(.8,'#e5c49b');gr.addColorStop(1,'#c99a6b');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    g.fillStyle='#bfe3ef';g.fillRect(w*.62,h*.06,w*.26,h*.3);g.fillStyle='rgba(255,245,205,.18)';g.beginPath();g.moveTo(w*.62,h*.36);g.lineTo(w*.88,h*.36);g.lineTo(w*.55,h);g.lineTo(w*.2,h);g.fill();
+    g.fillStyle='#c99a6b';g.fillRect(0,h*.8,w,h*.2);g.fillStyle='#8a5a35';g.fillRect(0,h*.3,w*.3,h*.05);
+    ['#3b6ea5','#c0463a','#e8b43c','#4f8f5b','#7b4f9c'].forEach((c,k)=>{g.fillStyle=c;g.fillRect(w*.36,h*.8-(k+1)*h*.035,w*.14,h*.035)});
+    ['#e2554a','#3a8fe0','#f2c14e','#6cc13a'].forEach((c,k)=>{g.fillStyle=c;g.fillRect(w*.84,h*.8-(k+1)*h*.08,h*.08,h*.08)});
+    const P=u=>[w*.05+u*w*.78,h*.3+Math.pow(u,1.3)*h*.47+Math.sin(u*9)*h*.02];
+    g.strokeStyle='#e9e2d6';g.lineWidth=10;g.beginPath();for(let u=0;u<=1;u+=.01){const[x,y]=P(u);u?g.lineTo(x,y-8):g.moveTo(x,y-8)}g.stroke();
+    ['#d8343c','#1fa6a0','#f5d93a','#e46aa8','#2f7a4e','#e8642c'].forEach((c,i)=>{const u=((t*.18)-i*.05)%1;if(u<0)return;const[x,y]=P(u);g.fillStyle=c;g.beginPath();g.arc(x,y-24,14,0,7);g.fill();g.fillStyle='rgba(255,255,255,.6)';g.beginPath();g.arc(x-4,y-29,4,0,7);g.fill()});
+    g.fillStyle='#3a8fe0';g.fillRect(w*.74,h*.7,w*.1,h*.1);
+    for(let i=0;i<14;i++){g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(w*(.3+.4*((i*.37+t*.02)%1)),h*(.4+.5*((i*.61+t*.03)%1)),2,0,7);g.fill()}
+    title(g,w,h,'#3b2a1a')},
+  // B: the gate drop. Eight marbles wait behind the gate, it flips down and they roll at you.
+  gate(g,t,w,h){
+    let gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#fbefdc');gr.addColorStop(1,'#d9b387');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    g.fillStyle='#a8754a';g.beginPath();g.moveTo(w*.38,h*.42);g.lineTo(w*.62,h*.42);g.lineTo(w*.95,h);g.lineTo(w*.05,h);g.fill();
+    g.fillStyle='#e9e2d6';g.fillRect(w*.36,h*.4,w*.28,h*.03);
+    const cyc=t%6, open=cyc>2.2;
+    const cols=['#d8343c','#1fa6a0','#f5d93a','#e46aa8','#2f7a4e','#e8642c','#7b4f9c','#3b6ea5'];
+    cols.forEach((c,i)=>{const lane=(i-3.5)/3.5;let p=open?Math.min(1.4,Math.pow((cyc-2.2)*.55,1.6)*(0.85+((i*7)%5)*.06)):0;const y=h*.47+p*h*.6,x=w*.5+lane*w*(.1+p*.35),r=10+p*45;
+      if(y>h+r)return;g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill();g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.arc(x-r*.3,y-r*.35,r*.28,0,7);g.fill()});
+    g.fillStyle='#c0392b';const gh=open?h*.012:h*.06;g.fillRect(w*.36,h*.5-gh/2,w*.28,gh);
+    if(!open){g.fillStyle='#3b2a1a';g.font='bold 54px Inter,sans-serif';g.textAlign='center';g.fillText(String(3-Math.floor(cyc/.75)%3||''),w*.5,h*.3)}
+    title(g,w,h,'#3b2a1a')},
+  // C: the marble jar. A big jar on the rug tips over and marbles spill and scatter.
+  jar(g,t,w,h){
+    g.fillStyle='#f3dcbc';g.fillRect(0,0,w,h);g.fillStyle='#c0463a';g.beginPath();g.ellipse(w*.5,h*.82,w*.48,h*.16,0,0,7);g.fill();g.strokeStyle='#e8b43c';g.lineWidth=6;g.beginPath();g.ellipse(w*.5,h*.82,w*.42,h*.12,0,0,7);g.stroke();
+    const cyc=t%7, tip=Math.min(1,Math.max(0,(cyc-1)/1.2));
+    g.save();g.translate(w*.3,h*.78);g.rotate(tip*1.25);g.fillStyle='rgba(200,230,240,.55)';g.strokeStyle='#9cc7d6';g.lineWidth=4;g.beginPath();g.roundRect(-60,-170,120,170,18);g.fill();g.stroke();
+    g.fillStyle='#8a5a35';g.fillRect(-48,-186,96,18);
+    if(tip<.3)for(let i=0;i<10;i++){g.fillStyle=['#d8343c','#1fa6a0','#f5d93a','#e46aa8','#2f7a4e'][i%5];g.beginPath();g.arc(-35+(i%4)*22,-20-Math.floor(i/4)*24,11,0,7);g.fill()}
+    g.restore();
+    if(tip>=.3)for(let i=0;i<10;i++){const s=Math.min(1,(cyc-1.4-i*.08)/2.5);if(s<0)continue;const e=1-Math.pow(1-s,3);const x=w*.38+e*w*(.1+((i*13)%9)*.05),y=h*.72+Math.sin(i*2.1)*h*.06*e+(1-e)*-20;
+      g.fillStyle=['#d8343c','#1fa6a0','#f5d93a','#e46aa8','#2f7a4e'][i%5];g.beginPath();g.arc(x,y,13,0,7);g.fill();g.fillStyle='rgba(255,255,255,.6)';g.beginPath();g.arc(x-4,y-5,4,0,7);g.fill()}
+    title(g,w,h,'#3b2a1a')}
+};
+function title(g,w,h,c){g.fillStyle=c;g.font='bold 58px Inter,sans-serif';g.textAlign='center';g.fillText('Marble Rush',w*.5,h*.16)}
 const DECISION = {
   title: "Marble Rush: look and sound",
-  intro: "Pick the music, the title font, the art direction, a backup name and the next track. One pick per question.",
-  note: "Version 0.3.0 ships now with the Recommended picks so the game has real music right away. Your picks replace them in the next release. All six tracks are Kevin MacLeod (CC BY 4.0) from Patch.gg, none used by another game. Previews are 35-second clips. The backup names are not name-checked yet.",
+  intro: "Pick how Marble Rush looks, sounds and plays. Look first, then sound and feel, then the name and the next track. One pick per question.",
+  note: "Version 0.3.0 ships with the Recommended picks so the game has real music right away. Your picks replace them in the next release. The icons, marbles, colors and start screens are quick sketches to choose a direction. The chosen one gets painted properly in the game's art style. Sound effect reels play: menu click, hop, boost, bumper, finish. All six music tracks are Kevin MacLeod (CC BY 4.0) from Patch.gg, none used by another game. The backup names and taglines are not name-checked yet.",
   label: "Marble Rush picks",
   questions: [
-    { id: "title", name: "Start screen music", sub: "Plays on the title screen. Bright and toy-like.",
+    { id: "icon", name: "APK icon", sub: "The phone app icon. Also the game page and browser tab icon (G6.10). Each card shows it big, at home screen size and tiny.",
       options: [
-        { title: "Quirky Dog", meta: ["Bouncy, bright, humorous, electronica", "2:29"], media: {audio: "audio/quirky_dog.mp3"}, rec: true },
-        { title: "Happy Bee", meta: ["Bouncy, bright, uplifting, rock", "5:02"], media: {audio: "audio/happy_bee.mp3"} },
-        { title: "Life of Riley", meta: ["Bright, relaxed, uplifting, pop", "3:55"], media: {audio: "audio/life_of_riley.mp3"} } ] },
-    { id: "race", name: "Race music", sub: "Plays during a race. Must differ from the start screen music.",
+        { title: "Red swirl marble (now)", meta: ["Your marble alone on the track", "Clearest at tiny size"], media: {img: "img/icon_a.jpg"}, rec: true },
+        { title: "Racing pack", meta: ["Three marbles racing down a ramp", "Says racing game, busier when tiny"], media: {img: "img/icon_b.jpg"} },
+        { title: "Ring of eight", meta: ["Your marble in the middle of the pack", "Bold color, warm toy room glow"], media: {img: "img/icon_c.jpg"} } ] },
+    { id: "hero", name: "Your marble", sub: "The marble you steer. The computer marbles keep their own colors.",
       options: [
-        { title: "Hyperfun", meta: ["Bouncy, bright, humorous, fast", "3:53"], media: {audio: "audio/hyperfun.mp3"}, rec: true },
-        { title: "Glitter Blast", meta: ["Bouncy, bright, grooving, pop", "2:58"], media: {audio: "audio/glitter_blast.mp3"} },
-        { title: "Happy Happy Game Show", meta: ["Grooving, bouncy, humorous, blues", "2:39"], media: {audio: "audio/happy_happy_game_show.mp3"} } ] },
+        { title: "Red swirl (now)", meta: ["Glossy red glass with a cream swirl", "Easy to spot in the pack"], media: {img: "img/hero_a.jpg"}, rec: true },
+        { title: "Cat's eye", meta: ["Clear glass with red, gold and blue petals", "The classic marble look"], media: {img: "img/hero_b.jpg"} },
+        { title: "Galaxy", meta: ["Deep blue with glowing rings and stars", "Stands out most on the warm track"], media: {img: "img/hero_c.jpg"} } ] },
+    { id: "scene", name: "Start screen scene", sub: "The painted scene and its hero motion (G5.21). No other game uses these. Moving sketches.",
+      options: [
+        { title: "Toy room run (now)", meta: ["A pack rolls from the desk to the bucket, again and again", "Dust drifts through the sunbeam"], media: {draw: "toyroom"}, rec: true },
+        { title: "Gate drop", meta: ["Eight marbles wait behind the gate, 3, 2, 1, then roll at you", "Shows the race start"], media: {draw: "gate"} },
+        { title: "Marble jar spill", meta: ["A big jar on the rug tips over and the marbles scatter", "Calmer and more playful"], media: {draw: "jar"} } ] },
+    { id: "colors", name: "Menu and page colors", sub: "Menu buttons, the talk box and the gradient at the top of the game page (G1.13).",
+      options: [
+        { title: "Toy room warm (now)", meta: ["Cream, wood and tomato red", "Matches the track"], media: {img: "img/colors_a.jpg"}, rec: true },
+        { title: "Candy bright", meta: ["Pink, lilac and sky blue", "Most playful"], media: {img: "img/colors_b.jpg"} },
+        { title: "Sky and wood", meta: ["Sky blue over warm wood", "Cooler and calmer"], media: {img: "img/colors_c.jpg"} } ] },
     { id: "font", name: "Title font", sub: "The name on the start screen, the game page and the Game Shelf card.",
       options: [
         { title: "Fredoka", meta: ["Round and soft, like the marbles", "Google Fonts, OFL"], media: {img: "img/font_Fredoka.jpg"}, rec: true },
@@ -57,6 +105,41 @@ const DECISION = {
         { title: "Clean toy render", meta: ["Glossy glass marbles with swirls, soft rounded toys, a giant toy room in afternoon light", "Palette: wood brown, cream, tomato red, sky blue, sunflower yellow, grass green", "Matches Brickhop and Updraft Aces"], rec: true },
         { title: "Wooden toy", meta: ["Natural wood track pieces and painted wooden blocks, like a real wooden marble run", "Warmer and calmer"] },
         { title: "Keep the built-in look", meta: ["Stay with the shapes drawn in code and polish them", "Fastest, no Gemini or Meshy"] } ] },
+    { id: "shelf", name: "Game Shelf card picture", sub: "The picture on your Game Shelf card. Gameplay only (G2.7).",
+      options: [
+        { title: "Desk Drop pack", meta: ["Your marble chasing the pack down the desk ramp"], media: {img: "img/shelf_1.jpg"}, rec: true },
+        { title: "Rug Run bumper", meta: ["Close up, steering around a bumper post"], media: {img: "img/shelf_2.jpg"} },
+        { title: "Time trial ghost", meta: ["Racing the see-through ghost of your best run"], media: {img: "img/shelf_3.jpg"} } ] },
+    { id: "title", name: "Start screen music", sub: "Plays on the title screen. Bright and toy-like.",
+      options: [
+        { title: "Quirky Dog", meta: ["Bouncy, bright, humorous, electronica", "2:29"], media: {audio: "audio/quirky_dog.mp3"}, rec: true },
+        { title: "Happy Bee", meta: ["Bouncy, bright, uplifting, rock", "5:02"], media: {audio: "audio/happy_bee.mp3"} },
+        { title: "Life of Riley", meta: ["Bright, relaxed, uplifting, pop", "3:55"], media: {audio: "audio/life_of_riley.mp3"} } ] },
+    { id: "race", name: "Race music", sub: "Plays during a race. Must differ from the start screen music.",
+      options: [
+        { title: "Hyperfun", meta: ["Bouncy, bright, humorous, fast", "3:53"], media: {audio: "audio/hyperfun.mp3"}, rec: true },
+        { title: "Glitter Blast", meta: ["Bouncy, bright, grooving, pop", "2:58"], media: {audio: "audio/glitter_blast.mp3"} },
+        { title: "Happy Happy Game Show", meta: ["Grooving, bouncy, humorous, blues", "2:39"], media: {audio: "audio/happy_happy_game_show.mp3"} } ] },
+    { id: "sfx", name: "Sound effects style", sub: "Each reel plays a menu click, a hop, a boost, a bumper and the finish.",
+      options: [
+        { title: "Glass clinks", meta: ["Bright chimes like real glass marbles"], media: {audio: "audio/sfx_glass.mp3"}, rec: true },
+        { title: "Wooden toy", meta: ["Soft knocks and clacks, warm and calm"], media: {audio: "audio/sfx_wood.mp3"} },
+        { title: "Arcade bleeps", meta: ["Retro chip sounds, punchy and fast"], media: {audio: "audio/sfx_arcade.mp3"} } ] },
+    { id: "calm", name: "Calm level (G4.1)", sub: "How much a mistake costs. The brief set the first one. Pick another to change it.",
+      options: [
+        { title: "Soft (now)", meta: ["Roll off an edge and drop back at the last checkpoint", "Easy, Normal and Hard in Settings, no game over"], rec: true },
+        { title: "Calmer", meta: ["Easy is the default: rails on every edge", "Places show only at the finish"] },
+        { title: "Racier", meta: ["A fall costs three seconds at the checkpoint", "Still no lives and no game over"] } ] },
+    { id: "controls", name: "Phone steering", sub: "The default on a phone. Keyboard and Xbox stay the same (G5.8). The others stay in Settings.",
+      options: [
+        { title: "Slide anywhere (now)", meta: ["Put a finger down and slide left or right", "Hop and Boost buttons at the bottom right"], media: {img: "img/controls_a.jpg"}, rec: true },
+        { title: "Tilt", meta: ["Tilt the phone to steer", "Feels most like a real marble, harder on a couch"], media: {img: "img/controls_b.jpg"} },
+        { title: "Left and right buttons", meta: ["Two buttons at the bottom left", "Most exact, less smooth"], media: {img: "img/controls_c.jpg"} } ] },
+    { id: "tagline", name: "Tagline", sub: "One line under the name on the Game Shelf card and the game page.",
+      options: [
+        { title: "A marble race down a giant toy room", meta: ["Now"], rec: true },
+        { title: "Eight marbles, one gate, first to the bucket", meta: ["Says how a race works"] },
+        { title: "Steer your marble through a giant toy room", meta: ["Puts you in control"] } ] },
     { id: "name", name: "Backup name", sub: "Marble Rush overlaps a VTech toy line and an itch.io game. Pick a backup in case the full check says change it.",
       options: [
         { title: "Keep Marble Rush, no backup yet", meta: ["Decide after the full name check"], rec: true },
