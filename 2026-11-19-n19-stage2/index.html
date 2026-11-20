@@ -98,6 +98,12 @@ const DECISION = {
 };
 const $=s=>document.querySelector(s), picks={};
 $('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+(function(){const sec=document.createElement('section');sec.innerHTML='<h2>All three at a glance</h2><p class="mute">A, B and C side by side. Details and Pick buttons are below.</p>';
+ const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;width:100%';
+ [['a','A. Highway at night'],['b','B. Arcade cabinet world'],['c','C. City in the rain']].forEach(([k,label])=>{const col=document.createElement('div');col.style.cssText='flex:1 1 0;min-width:0';
+  const cv=document.createElement('canvas');cv.width=800;cv.height=600;cv.dataset.draw=k;cv.style.cssText='width:100%;aspect-ratio:4/3;border-radius:8px;background:#000;display:block';
+  const t=document.createElement('div');t.textContent=label;t.style.cssText='font:600 13px Inter,sans-serif;margin-top:4px;color:#f2b84b';col.appendChild(cv);col.appendChild(t);row.appendChild(col)});
+ sec.appendChild(row);$('#main').appendChild(sec)})();
 for(const q of DECISION.questions){
   const sec=document.createElement('section');
   sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
