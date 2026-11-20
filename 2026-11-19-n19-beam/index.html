@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sunset Static charge beam</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     push it to bclark10121-cloud/bc-decisions as <date>-<topic>/index.html, add it to that repo's index.html
+     open https://bclark10121-cloud.github.io/bc-decisions/<date>-<topic>/ in a NEW full-width browser tab
+     and put that full link in the reply. Never as a Claude artifact. BC picks, presses Copy my picks and pastes the text in chat. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;max-width:800px;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+
+const SHIP=new Image();SHIP.src='img/ship.png';const DR=new Image();DR.src='img/drifter.png';
+const LO=document.createElement('canvas');LO.width=200;LO.height=150;const L=LO.getContext('2d');L.imageSmoothingEnabled=false;
+function bg(t){const g=L.createLinearGradient(0,0,0,90);g.addColorStop(0,'#100826');g.addColorStop(1,'#46145c');L.fillStyle=g;L.fillRect(0,0,200,90);
+ L.fillStyle='#ff7a59';L.beginPath();L.arc(150,90,26,Math.PI,0);L.fill();L.fillStyle='#100826';for(let y=70;y<90;y+=5)L.fillRect(120,y,60,1);
+ L.fillStyle='#07040d';L.fillRect(0,90,200,60);L.strokeStyle='#22e3ff';L.lineWidth=1;for(let i=-12;i<=12;i++){L.beginPath();L.moveTo(100+i*10,90);L.lineTo(100+i*60,150);L.stroke()}
+ for(let j=0;j<6;j++){const p=((j+(t*2)%1)/6);const y=90+60*p*p;L.beginPath();L.moveTo(0,Math.round(y)+.5);L.lineTo(200,Math.round(y)+.5);L.stroke()}}
+// one loop: 0-1.3 s hold (charge), 1.3 s release, the shot flies to the drifter at x 160, a burst, rest
+function loop(ctx,t,w,h,charge,shot){const T=t%3.2;bg(t);const sy=60,sx=36;
+ L.drawImage(SHIP,sx-20,sy-10);const c=Math.min(1,T/1.3);const fired=T>=1.3;const st=T-1.3;const hx=sx+22+st*190;
+ const alive=!(fired&&hx>=152);if(alive)L.drawImage(DR,0,0,DR.height,DR.height,152,sy-DR.height/2,DR.height,DR.height);
+ if(!fired)charge(sx+22,sy,c,t);else if(hx<165)shot(hx,sy,st,sx+22);
+ if(fired&&hx>=152&&st<1.2){const k=(hx-152)/40;L.fillStyle='rgba(255,210,63,'+Math.max(0,1-k)+')';L.beginPath();L.arc(158,sy,4+k*14,0,7);L.fill()}
+ L.fillStyle='#000a';L.fillRect(70,140,62,5);L.fillStyle=c>=1&&!fired?'#fff4fb':'#ff2e88';if(!fired)L.fillRect(71,141,60*c,3);
+ ctx.imageSmoothingEnabled=false;ctx.drawImage(LO,0,0,200,150,0,0,w,h)}
+const SCENES={
+ now:(g,t,w,h)=>loop(g,t,w,h,(x,y,c)=>{L.fillStyle='rgba(255,46,136,'+(0.35+0.5*c)+')';L.beginPath();L.arc(x+2,y,1+c*4,0,7);L.fill()},
+   (x,y)=>{const r=4+8;L.fillStyle='rgba(255,46,136,.6)';L.fillRect(x-30,y-r,38,r*2);L.fillStyle='#ff9ccb';L.fillRect(x-28,y-7,36,14);L.fillStyle='#fff4fb';L.fillRect(x-26,y-3,34,6)}),
+ plasma:(g,t,w,h)=>loop(g,t,w,h,(x,y,c,tt)=>{const r=1+c*5;L.fillStyle='rgba(34,227,255,.25)';L.beginPath();L.arc(x+3,y,r+2,0,7);L.fill();L.fillStyle='#22e3ff';L.beginPath();L.arc(x+3,y,r,0,7);L.fill();L.fillStyle='#fff';L.beginPath();L.arc(x+3,y,r*.45,0,7);L.fill();for(let k=0;k<4;k++){const a=tt*6+k*1.57;L.fillRect(Math.round(x+3+Math.cos(a)*(r+4)),Math.round(y+Math.sin(a)*(r+4)),1,1)}},
+   (x,y,st)=>{for(let k=1;k<6;k++){L.fillStyle='rgba(34,227,255,'+(0.5-k*0.08)+')';L.beginPath();L.arc(x-k*5,y+Math.sin(st*30+k)*1.5,6-k,0,7);L.fill()}L.fillStyle='rgba(34,227,255,.35)';L.beginPath();L.arc(x,y,9,0,7);L.fill();L.fillStyle='#22e3ff';L.beginPath();L.arc(x,y,6,0,7);L.fill();L.fillStyle='#fff';L.beginPath();L.arc(x,y,3,0,7);L.fill()}),
+ wave:(g,t,w,h)=>loop(g,t,w,h,(x,y,c,tt)=>{const n=Math.ceil(c*3);for(let k=0;k<n;k++){L.strokeStyle='rgba(255,122,89,'+(0.9-k*0.25)+')';L.lineWidth=1;L.beginPath();L.arc(x-2,y,3+k*3+((tt*8)%1)*1.5,-0.9,0.9);L.stroke()}},
+   (x,y)=>{for(let k=0;k<4;k++){L.strokeStyle=k==0?'#fff4fb':(k==1?'#ffd23f':'rgba(255,122,89,'+(0.8-k*0.2)+')');L.lineWidth=2;L.beginPath();L.arc(x-12-k*6,y,10+k*2,-0.8,0.8);L.stroke()}}),
+ arrow:(g,t,w,h)=>loop(g,t,w,h,(x,y,c,tt)=>{const s=2+c*5;L.fillStyle='rgba(255,46,136,'+(0.4+0.5*c)+')';L.beginPath();L.moveTo(x+s+2,y);L.lineTo(x,y-s);L.lineTo(x+2,y);L.lineTo(x,y+s);L.fill();if(c>=1&&Math.floor(tt*10)%2==0){L.fillStyle='#fff4fb';L.fillRect(x+1,y-1,3,2)}},
+   (x,y,st,x0)=>{L.fillStyle='rgba(255,46,136,.35)';L.fillRect(Math.max(x0,x-60),y-1,Math.min(60,x-x0),3);L.fillStyle='#ff9ccb';L.fillRect(Math.max(x0,x-30),y,Math.min(30,x-x0),1);L.fillStyle='#ff2e88';L.beginPath();L.moveTo(x+10,y);L.lineTo(x-4,y-9);L.lineTo(x,y);L.lineTo(x-4,y+9);L.fill();L.fillStyle='#fff4fb';L.beginPath();L.moveTo(x+7,y);L.lineTo(x-1,y-4);L.lineTo(x+1,y);L.lineTo(x-1,y+4);L.fill()}),
+ rail:(g,t,w,h)=>loop(g,t,w,h,(x,y,c,tt)=>{L.fillStyle='rgba(255,255,255,'+(0.2+0.6*c)+')';L.fillRect(x,y,2+Math.round(c*6),1);for(let k=0;k<3;k++){if(Math.random()<c){L.fillStyle='#ffd23f';L.fillRect(x+Math.round(Math.random()*8),y-3+Math.round(Math.random()*6),1,1)}}},
+   (x,y,st,x0)=>{const a=Math.max(0,1-st*2.2);L.fillStyle='rgba(255,210,63,'+(0.5*a+0.2)+')';L.fillRect(x0,y-2,x-x0+6,5);L.fillStyle='rgba(255,244,251,'+(0.6+0.4*a)+')';L.fillRect(x0,y,x-x0+6,1);L.fillStyle='#fff';L.fillRect(x+2,y-2,4,5)})};
+const DECISION = {
+  title: "Sunset Static charge beam: pick a new look",
+  intro: "Hold A (or J or Space) to charge, let go to fire. Each card shows the full cycle on loop: the charge-up at the ship's nose and the meter, then the shot flying into a drifter. Option A is today's look, for comparison.",
+  note: "Only the look changes: damage, size and the full-beam shell and orb breaking stay the same unless you add a note. The charge meter under the ship stays. Add a note to mix ideas, such as the plasma charge-up with the arrow shot, or a color change.",
+  label: "Sunset Static beam pick",
+  questions: [
+    { id: "beam", name: "Charge beam look", sub: "One pick. Use the speed buttons at the bottom to slow the previews down.",
+      options: [
+        { title: "Today: pink block", meta: ["A growing pink dot, then a wide pink and white block. The one you want gone."], media: {draw: "now"} },
+        { title: "Plasma orb", meta: ["A cyan ball of light swirls up at the nose, then flies as a glowing orb with a short wobbly tail.", "Matches the crystal and core colors. Reads as one solid hit."], media: {draw: "plasma"}, rec: true },
+        { title: "Sound wave", meta: ["Orange arcs ripple out at the nose like a speaker, then a stack of curved waves rolls forward.", "Ties the beam to the music theme. Wider, easier to hit with."], media: {draw: "wave"} },
+        { title: "Neon arrow", meta: ["A magenta chevron sharpens at the nose and blinks white when full, then an arrowhead flies with a streak behind it.", "Sleek and fast. Thinner, so it looks more precise."], media: {draw: "arrow"} },
+        { title: "Rail flash", meta: ["Sparks crackle at the nose, then a thin gold line flashes from the ship to the target and fades.", "Feels instant and punchy. Least clutter on screen."], media: {draw: "rail"} } ] } ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=800;e.height=600;e.style.cssText='width:100%;max-width:800px;aspect-ratio:4/3;border-radius:10px;margin:8px 0;background:#000;display:block';e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
