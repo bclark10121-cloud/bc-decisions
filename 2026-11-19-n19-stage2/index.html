@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sunset Static Stage 2: pick a setting</title>
+<style></style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     push it to bclark10121-cloud/bc-decisions as <date>-<topic>/index.html, add it to that repo's index.html
+     open https://bclark10121-cloud.github.io/bc-decisions/<date>-<topic>/ in a NEW full-width browser tab
+     and put that full link in the reply. Never as a Claude artifact. BC picks, presses Copy my picks and pastes the text in chat. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;max-width:800px;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+const SCENES = {};
+const TAU=Math.PI*2;
+function ship(g,x,y,s){g.save();g.translate(x,y);g.scale(s,s);
+ g.fillStyle='#ff2e88';g.fillRect(-34,-2,8,4);g.fillStyle='#ffd23f';g.fillRect(-30,-1,4,2);
+ g.fillStyle='#5c567a';g.beginPath();g.moveTo(-26,-5);g.lineTo(18,-3);g.lineTo(30,0);g.lineTo(18,3);g.lineTo(-26,5);g.closePath();g.fill();
+ g.fillStyle='#3a3550';g.beginPath();g.moveTo(-22,-5);g.lineTo(-16,-13);g.lineTo(-10,-5);g.fill();
+ g.fillStyle='#22e3ff';g.fillRect(-20,-1,36,1.5);g.beginPath();g.ellipse(4,-5,6,4,0,Math.PI,0);g.fill();g.restore()}
+function pod(g,x,y,t){g.strokeStyle='#22e3ff';g.lineWidth=3;g.beginPath();g.arc(x,y,9,0,TAU);g.stroke();g.fillStyle='#ff2e88';g.beginPath();g.arc(x,y,4+Math.sin(t*8),0,TAU);g.fill()}
+function shots(g,x,y,t){g.fillStyle='#bff9ff';for(let i=0;i<5;i++){const sx=x+40+((t*600+i*120)%600);g.fillRect(sx,y-1,16,3)}}
+function grad(g,h,stops){const s=g.createLinearGradient(0,0,0,h);stops.forEach(([o,c])=>s.addColorStop(o,c));return s}
+// A: a highway at night
+SCENES.a=(g,t,w,h)=>{const hz=h*0.48;g.fillStyle=grad(g,hz,[[0,'#0a0620'],[1,'#2a1050']]);g.fillRect(0,0,w,hz);
+ for(let i=0;i<60;i++){g.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*2+i)})`;g.fillRect((i*137)%w,(i*53)%(hz*0.7),2,2)}
+ g.fillStyle='#e8e2ff';g.beginPath();g.arc(w*0.78,h*0.16,26,0,TAU);g.fill();g.fillStyle='#2a1050';g.beginPath();g.arc(w*0.78+10,h*0.15,24,0,TAU);g.fill();
+ for(let i=0;i<14;i++){const x=((i*90)-t*60)%(w+90);const xx=x<-90?x+w+90:x;g.fillStyle='#160a2c';g.fillRect(xx,hz-30-(i*37)%50,70,60);g.fillStyle='#ff2e88';g.fillRect(xx,hz-30-(i*37)%50,70,2)}
+ g.fillStyle='#0b0618';g.fillRect(0,hz,w,h-hz);
+ // the road rushing toward a vanishing point at the right
+ g.fillStyle='#1d1530';g.beginPath();g.moveTo(w*0.5,hz);g.lineTo(w*0.56,hz);g.lineTo(w,h);g.lineTo(0,h);g.closePath();g.fill();
+ g.strokeStyle='#ffd23f';g.lineWidth=4;for(let k=0;k<10;k++){const u=((k/10)+t*0.9)%1;const p=u*u;const y=hz+(h-hz)*p;const x1=w*0.53+(w*0.5-w*0.53)*p;g.globalAlpha=Math.min(1,u*3);g.beginPath();g.moveTo(x1,y);g.lineTo(x1-8*p,y+18*p);g.stroke()}g.globalAlpha=1;
+ g.strokeStyle='#22e3ff';g.lineWidth=2;g.beginPath();g.moveTo(w*0.5,hz);g.lineTo(0,h);g.moveTo(w*0.56,hz);g.lineTo(w,h);g.stroke();
+ // street lights passing and cars with tail lights
+ for(let k=0;k<6;k++){const u=((k/6)+t*0.5)%1;const p=u*u;const x=w*0.56+(w*0.44)*p+20*p;const y=hz-10-160*p;g.fillStyle=`rgba(255,210,63,${p})`;g.fillRect(x,y,6+20*p,3+4*p);g.fillStyle='#3a3550';g.fillRect(x+2,y,2+2*p,h)}
+ for(let k=0;k<3;k++){const cx=((k*300)+t*120)%(w+200)-100;const cy=h*0.78+k*20;g.fillStyle='#2a2440';g.fillRect(cx,cy,90,26);g.fillStyle='#ff2e3a';g.fillRect(cx,cy+8,10,6);g.fillRect(cx+80,cy+8,10,6);g.fillStyle='rgba(255,46,58,0.25)';g.fillRect(cx-40,cy+6,40,10)}
+ const sy=h*0.34+Math.sin(t*1.6)*30;shots(g,w*0.26,sy,t);ship(g,w*0.22,sy,2.2);pod(g,w*0.22+78,sy,t)};
+// B: an arcade cabinet world
+SCENES.b=(g,t,w,h)=>{g.fillStyle='#07040f';g.fillRect(0,0,w,h);
+ const cols=['#ff2e88','#22e3ff','#ffd23f','#a35cff','#7dff8a'];
+ for(let i=0;i<7;i++){const x=((i*150)-t*70)%(w+150);const xx=x<-150?x+w+150:x;const ch=260+(i%3)*50;const y=h*0.72-ch;
+  g.fillStyle='#1b1230';g.fillRect(xx,y,120,ch);g.fillStyle='#120a22';g.fillRect(xx+12,y+70,96,80);
+  const c=cols[(i+Math.floor(t*2))%5];g.fillStyle=c;g.fillRect(xx+8,y+10,104,30);g.fillStyle='#07040f';g.fillRect(xx+14,y+18,92,14);
+  g.fillStyle=c;for(let k=0;k<6;k++)if((k+Math.floor(t*6))%3)g.fillRect(xx+18+k*14,y+21,10,8);
+  // the cabinet screen shows a tiny game
+  g.fillStyle=cols[(i+2)%5];g.fillRect(xx+20+((t*60+i*20)%70),y+100+Math.sin(t*3+i)*20,8,8);
+  g.fillStyle='#ff2e88';g.beginPath();g.arc(xx+40,y+180,8,0,TAU);g.fill();g.fillStyle='#22e3ff';g.beginPath();g.arc(xx+70,y+182,7,0,TAU);g.fill()}
+ // checkered arcade floor
+ const hz=h*0.72;for(let r=0;r<8;r++){const y0=hz+(h-hz)*Math.pow(r/8,1.6),y1=hz+(h-hz)*Math.pow((r+1)/8,1.6);for(let c=0;c<16;c++){const off=(t*120)%(w/8);g.fillStyle=(r+c)%2?'#1b1230':'#2a1a48';g.fillRect(c*w/8-off,y0,w/8,y1-y0)}}
+ // scanlines and floating coins
+ g.fillStyle='rgba(0,0,0,0.25)';for(let y=0;y<h;y+=4)g.fillRect(0,y,w,2);
+ for(let k=0;k<8;k++){const x=(w-((t*150+k*130)%(w+40)));const y=120+((k*67)%200)+Math.sin(t*4+k)*10;g.fillStyle='#ffd23f';g.fillRect(x,y,10,14);g.fillStyle='#fff4c0';g.fillRect(x+3,y+2,3,10)}
+ const sy=h*0.3+Math.sin(t*1.6)*30;shots(g,w*0.26,sy,t);ship(g,w*0.22,sy,2.2);pod(g,w*0.22+78,sy,t)};
+// C: a city in the rain
+SCENES.c=(g,t,w,h)=>{g.fillStyle=grad(g,h,[[0,'#0b0c1e'],[0.6,'#1a1238'],[1,'#0b0618']]);g.fillRect(0,0,w,h);
+ const flash=(t%7)<0.12||((t%7)>0.25&&(t%7)<0.32);if(flash){g.fillStyle='rgba(200,210,255,0.35)';g.fillRect(0,0,w,h)}
+ for(let layer=0;layer<2;layer++){const sp=layer?90:40;const base=layer?h*0.95:h*0.8;g.fillStyle=layer?'#140c26':'#1e1538';
+  for(let i=0;i<10;i++){const bw=60+(i*37)%50,bh=(layer?280:200)+(i*71)%160;const x=((i*120)-t*sp)%(w+200);const xx=x<-200?x+w+200:x;g.fillStyle=layer?'#140c26':'#1e1538';g.fillRect(xx,base-bh,bw,bh);
+   if(layer){for(let wy=base-bh+14;wy<base-10;wy+=18)for(let wx=xx+8;wx<xx+bw-8;wx+=14)if(((wx*7+wy*3+i)|0)%5==0){g.fillStyle='#22e3ff';g.fillRect(wx,wy,6,8);g.fillStyle='#140c26'}
+    if(i%3==0){const sc=['#ff2e88','#ffd23f','#22e3ff'][i%3==0?(i/3|0)%3:0];g.fillStyle=Math.sin(t*5+i)>-0.6?sc:'#331a40';g.fillRect(xx+bw-6,base-bh+40,14,60)}}}}
+ // wet street with reflections
+ g.fillStyle='rgba(30,20,60,0.85)';g.fillRect(0,h*0.86,w,h*0.14);
+ for(let k=0;k<12;k++){g.fillStyle=`rgba(${k%2?'255,46,136':'34,227,255'},0.25)`;g.fillRect(((k*90)-t*90)%w,h*0.88+(k%3)*12,40+(k%4)*12,3)}
+ // rain streaks
+ g.strokeStyle='rgba(180,200,255,0.45)';g.lineWidth=1.5;for(let i=0;i<140;i++){const x=(i*61+t*500)%(w+100)-50;const y=(i*97+t*900)%h;g.beginPath();g.moveTo(x,y);g.lineTo(x-8,y+22);g.stroke()}
+ const sy=h*0.36+Math.sin(t*1.6)*30;shots(g,w*0.26,sy,t);ship(g,w*0.22,sy,2.2);pod(g,w*0.22+78,sy,t)};
+const DECISION = {
+  title: "Sunset Static Stage 2: pick a setting",
+  intro: "Stage 2 for Sunset Static. Pick the neon setting. It sets the look, the walls, two new enemy kinds and the boss. Each preview moves: the ship, the pod and the scene. The previews are quick sketches. The real stage is pixel art drawn in code like Stage 1.",
+  note: "Same rules as Stage 1: soft fail, three levels, beat sync and about 6 to 8 minutes. Stage 2 opens after you beat The Big Disc, and Stage 1 stays playable. I suggest new play music for Stage 2, picked by ear like before on a later page. Add a note if you want to mix ideas, such as the rain city with the highway boss.",
+  label: "Sunset Static Stage 2 picks",
+  questions: [
+    { id: "setting", name: "Stage 2 setting", sub: "One pick. Notes welcome.",
+      options: [
+        { title: "Highway at night", meta: ["A neon freeway under the moon. Street lights rush past, cars with red tail lights below, overpasses as walls.", "New enemies: road racers that weave between lanes, and toll gates that open and close on the beat.", "Boss: the Night Hauler, a long armored truck that fights in three trailers."], media: {draw:"a"}, rec: true },
+        { title: "Arcade cabinet world", meta: ["You fly inside a giant arcade. Cabinets tower over a checkered floor, marquees flash, coins float.", "New enemies: pixel invaders that march in rows, and coin bugs that drop speed and shield pickups.", "Boss: the High Score, a cabinet whose screen fires mini games at you."], media: {draw:"b"} },
+        { title: "City in the rain", meta: ["Close neon towers, flickering signs, rain streaks and lightning flashes, a wet street that reflects the lights.", "New enemies: umbrella drones that block shots from above, and sign crawlers that cling to walls.", "Boss: the Storm Sign, a huge billboard that shifts its letters into new attack shapes."], media: {draw:"c"} } ] } ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=800;e.height=600;e.style.cssText='width:100%;max-width:800px;aspect-ratio:4/3;border-radius:10px;margin:8px 0;background:#000;display:block';e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
