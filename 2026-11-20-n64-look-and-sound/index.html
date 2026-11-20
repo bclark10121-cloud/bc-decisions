@@ -22,7 +22,7 @@ button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14
 .card.on .pick{background:var(--acc);color:#1b1608}
 textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
 .bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
-.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
 </style></head><body>
 <header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
 <main id="main"></main>
@@ -179,6 +179,6 @@ let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclic
 (function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
 document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
 function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
-function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked. `+text():'No picks yet.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked`+(n<DECISION.questions.length?'':'. Press Copy my picks.'):'No picks yet.'}
 $('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
 </script></body></html>
