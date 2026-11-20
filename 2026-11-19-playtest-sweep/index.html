@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playtest sweep, 2026-11-19</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Playtest sweep (G0.16 decision page style). Every pending check and unconfirmed judgment call across all games,
+     plus the three Saffron Drift 0.8.0 picks. BC marks each row, presses Copy my picks and pastes the text in chat. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b;--good:#7bc47f;--bad:#e98a6b;--line:#2e2a40}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{padding:0 28px}header{padding-top:28px}main{padding-bottom:140px;max-width:1100px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 22px Fraunces,serif;margin:0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.game{background:var(--card);border-radius:14px;padding:16px 18px;margin-top:18px}
+.ghead{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.ghead a{color:var(--acc);font-size:13px}
+.tag{font-size:12px;color:var(--mute)}
+.row{border-top:1px solid var(--line);padding:10px 0;display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center}
+.row .q{font-size:14px}.row .sub{font-size:12px;color:var(--mute)}
+.btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+button{font:600 13px Inter,sans-serif;border:0;border-radius:9px;padding:7px 11px;cursor:pointer;background:var(--line);color:var(--ink)}
+button.on.g{background:var(--good);color:#10200f}button.on.b{background:var(--bad);color:#2a0f06}button.on.s{background:#6b6488}button.on.p{background:var(--acc);color:#1b1608}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:4px}
+input.n{grid-column:1/-1;display:none;width:100%;background:#16141f;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:13px Inter,sans-serif}
+input.n.show{display:block}
+details{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}summary{cursor:pointer;color:var(--acc);font-size:14px;font-weight:600}
+.jc{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid var(--line);padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#sum{flex:1;color:var(--mute);font-size:13px}#copy{background:var(--acc);color:#1b1608;font-size:14px;padding:9px 14px}
+</style></head><body>
+<header><h1>Playtest sweep</h1>
+<p class="mute">Every check waiting on you across all games, plus the judgment calls from recent releases. About 30 minutes. Start at the top. Skip anything you run out of time for.</p>
+<div class="note">How it works. Mark each check Good, Needs work or Skipped. Needs work opens a note box. Judgment calls start as Accepted. Press Change on any you want different and say how. Then press Copy my picks and paste the text in chat. I turn every Needs work into backlog items and clear the old Now lists. Open each game from its page link, never a direct game link. Games marked "phone" are best on your Z Fold. "Upright" means hold the phone in portrait.</div>
+</header>
+<main id="main"></main>
+<div class="bar"><span id="sum"></span><button id="copy">Copy my picks</button></div>
+<script>
+const SWEEP = [
+ {id:"sd8", name:"Saffron Drift 0.8.0: three picks before the build", tag:"Unblocks the next release. No playing needed.", picks:[
+  {id:"rider", q:"The rider's name", sub:"A young nomad, about 16. Noor is taken by a Nomad Camp neighbor.",
+   opts:["Tavi","Sami","Ren","Esa","Kesh","Player types a name"], rec:"Tavi"},
+  {id:"keepers", q:"Who keeps the five pattern sites", sub:"Red Steps (climbing), Glass Flats Market (dyes), Spiral Ridge (upgrades), Dry Lake Wells (water), Star Arch (stars at night).",
+   opts:["Move current people: Mira, Rana, Kip, Pell, Sef","Three current (Rana, Kip, Pell) plus two new","Five new keepers"], rec:"Move current people: Mira, Rana, Kip, Pell, Sef"},
+  {id:"suna", q:"Elder Suna", sub:"The ending choice with her goes away in The Drift story either way.",
+   opts:["Stays as the caravan elder who sends you off and welcomes you home","Leaves the game"], rec:"Stays as the caravan elder who sends you off and welcomes you home"}]},
+ {id:"sd", name:"Saffron Drift", ver:"0.7.2", url:"saffron-drift", tag:"Phone and controller, 4 min", checks:[
+  "Carpet feel: steering, speed, jump and boost smoke",
+  "Climbing and gliding: stamina, sliding when tired, glide bubble",
+  "Camera: pulls back on climbs, Camera behind you button",
+  "Frame rate on your phone",
+  "Upright: the view and the touch buttons"]},
+ {id:"hbd", name:"Home by Dusk", ver:"0.9.1", url:"home-by-dusk", tag:"Phone, 6 min. The longest list. Debug Feel tools switch values live.", checks:[
+  "Live 3D Wren test (v0.6.0): does live Wren belong in the painting? Decides stage 3B",
+  "New moves: run start, stop, turn, take-off, top of jump, fall, landing",
+  "Whip feel: 4 tile reach, wind-up speed, hold to repeat, crack sound",
+  "Whip in hand: coil, tail, belt during sword swings. Too lively, too still, too long, too short?",
+  "Tip bonus: 6 damage on the last quarter of the reach, 0.1 s button memory",
+  "Run: lean and dust at full speed",
+  "Other weapons: any still stiff? Hit pause length right?",
+  "The three dark music tracks. Name a mood to swap any",
+  "Painted art: anything too dark, busy or soft",
+  "Jump height, run speed and strike timings",
+  "Speed on a real phone (HD art is heavier)",
+  "Upright: Wren same size, narrower view, sky fills the top"],
+  jc:[
+  "Upright keeps the landscape zoom. Narrower view, sky fills the extra height",
+  "Pip's cart and the swap choice have Back at the top left (was Close at the top right)",
+  "The Menu row and button fade out while a full screen panel is open",
+  "Upright, the touch buttons stay in the lower right",
+  "The APK turns with the phone but follows Android's rotation lock",
+  "Start screen controls line shows only the main keys. How to play has the full list",
+  "12 achievements, each from a number the save already keeps",
+  "Old saves get earlier achievements quietly, with no burst of toasts",
+  "No Hold or Toggle setting: nothing in the game is held for long",
+  "Music stays at 32 kHz for browser memory, with a hand gain. Proposed kit change: keep each file's own sample rate",
+  "The Game Shelf picture stays the one you picked, not a new one each release"]},
+ {id:"koh", name:"Keeper of the Hollow", ver:"0.21.2", url:"keeper-of-the-hollow", tag:"Phone, 3 min", checks:[
+  "Upright: camera view (each style's lens times 1.15)",
+  "Upright: the Menu book stacks its list over its preview page, drawn over the speech box",
+  "Overall feel since the storybook releases"],
+  picks:[{id:"cards", q:"Opening story cards: move them into the storybook speech box too?", sub:"Open since Release C. Today they show as full story cards.", opts:["Yes, move them","No, keep the story cards"], rec:null}],
+  jc:[
+  "Frogs by the pond stay (the owl hoot is gone)",
+  "More's \"Back to the game\" became Back at the top left",
+  "The Menu button and find counter fade under a full screen panel",
+  "ScreenFit replaces the old 30 percent upright size. Text size still scales on top"]},
+ {id:"ss", name:"Sunset Static", ver:"0.5.0", url:"sunset-static", tag:"Any device, 3 min. Its own chat builds v0.6.0", checks:[
+  "Stage 2 Insert Coin: the arcade cabinet world, Blips, coin bugs",
+  "Upright on your phone"]},
+ {id:"ph", name:"Pixel Hollow", ver:"0.19.2", url:"pixel-hollow", tag:"Real phone plus Xbox controller, 2 min. Never checked on a device since the split", checks:[
+  "Plays on your phone with sound",
+  "Xbox controller works in every menu",
+  "Upright: everything fits"],
+  jc:[
+  "Your character keeps Done (not Back) at the top left",
+  "The Journal's page button says < Prev, so it is not mixed up with Back",
+  "Title track inlined in the page. Page grew from 0.45 MB to 2.8 MB",
+  "Photo mode's Done bar stays at the bottom"]},
+ {id:"blg", name:"By Lantern's Glow", ver:"0.19.1", url:"by-lanterns-glow", tag:"Real phone plus Xbox controller, 2 min. Never checked on a device since the split", checks:[
+  "Plays on your phone with sound",
+  "Xbox controller works in every menu",
+  "Lantern finds after dark (v0.17.0)",
+  "Upright: everything fits"],
+  jc:[
+  "Your character keeps Done (not Back) at the top left",
+  "The Journal's page button says < Prev",
+  "Title track inlined in the page. Page grew from 0.45 MB to 2.8 MB",
+  "Photo mode's Done bar stays at the bottom"]},
+ {id:"tt", name:"Tiny Tailwind", ver:"0.6.3", url:"tiny-tailwind", tag:"Phone, Retroid or controller, 3 min", checks:[
+  "Frame rate with the glow on",
+  "The pew sound is easy to hear",
+  "Upright: touch sticks and the dash button height (a guess, never tried on a phone)",
+  "Overall feel. Ready for Release 3, weapons?"],
+  jc:[
+  "Upright keeps the same zoom: less to the sides, more above and below",
+  "The in-game Menu keeps Resume first and Close at the top right, no separate Back",
+  "The Wagon's Close is now Back at the top left",
+  "The end card keeps its one button in the middle",
+  "The minimap stays top right in both orientations"]},
+ {id:"ttf", name:"Tiny Titans Football", ver:"0.6.3", url:"tiny-titans-football", tag:"Any device, 4 min. Playtest notes since v0.3 are still open", checks:[
+  "Overall feel: running, passing, tackling",
+  "The code-built players and touchdown celebrations",
+  "\"Stage 3\" music level",
+  "Upright: camera 35 percent higher, players smaller"],
+  jc:[
+  "Play, then a slot, leads to a How do you want to play screen",
+  "Gloves, face mask and cleats stay charcoal for every team",
+  "No helmet stripe or logo",
+  "Shoulder pads a little narrower than the art, so linemen don't merge",
+  "Celebration style set by jersey number, not random",
+  "Season screen keeps Play week, End season and Title in one bottom row"]},
+ {id:"lfl", name:"Lo-Fi League", ver:"0.7.2", url:"lo-fi-league", tag:"Any device plus the Retroid, 4 min", checks:[
+  "Flow: through balls, runs, skill moves and the chill defense",
+  "Retroid browser: reaches the title card every time",
+  "Upright: camera rises and moves in, goals come into view near the box",
+  "Title screen: add a soft halo behind the name? (Good = no, Needs work = add it)"],
+  jc:[
+  "Buttons: Y through ball, X skill move, B shoot",
+  "Skill move picked from the stick: Flick forward, Step-over sideways, Roulette back",
+  "Up to two runners at a time, only forwards and attacking midfielders",
+  "No offside",
+  "The computer uses through balls and skill moves too",
+  "How to play is a full-screen panel that scrolls",
+  "The icon was built in code (three.js), not Meshy",
+  "The full time card keeps its three buttons in a row"]},
+ {id:"tsr", name:"The Scenic Route", ver:"0.8.2", url:"the-scenic-route", tag:"Phone, 3 min", checks:[
+  "Upright: 40 degree view, more road ahead",
+  "Upright: touch steering reaches as far as sideways",
+  "Overall drive feel and jumps"],
+  jc:[
+  "The Journal and How to play have Back at the top left (was Close on the right)",
+  "The Menu row and button fade while the Journal or How to play is open",
+  "Play, then a slot, starts driving at once"]}
+];
+const ST = {}; // key -> {v, note}
+const $ = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+function rowEl(key, q, sub, opts, kinds, rec){
+  const r=$("div","row"); const l=$("div"); l.appendChild($("div","q",q)); if(sub) l.appendChild($("div","sub",sub)); r.appendChild(l);
+  const b=$("div","btns"); const n=$("input","n"); n.placeholder="What needs to change?";
+  opts.forEach((o,i)=>{const x=$("button",kinds[i]||"p",o+(rec===o?'<span class="rec">Suggested</span>':""));
+    x.onclick=()=>{ST[key]={v:o,note:n.value}; [...b.children].forEach(c=>c.classList.remove("on")); x.classList.add("on");
+      n.classList.toggle("show", kinds[i]==="b"||(kinds[i]==="p"&&/types|new/i.test(o))); upd();};
+    b.appendChild(x);});
+  n.oninput=()=>{if(ST[key])ST[key].note=n.value;};
+  r.appendChild(b); r.appendChild(n); return r;
+}
+const main=document.getElementById("main");
+SWEEP.forEach(g=>{
+  const box=$("section","game"); const h=$("div","ghead"); h.appendChild($("h2",null,g.name+(g.ver?" "+g.ver:"")));
+  if(g.url){const a=$("a",null,"Open game page"); a.href="https://bclark10121-cloud.github.io/"+g.url+"/"; a.target="_blank"; h.appendChild(a);}
+  h.appendChild($("span","tag",g.tag)); box.appendChild(h);
+  (g.picks||[]).forEach(p=>box.appendChild(rowEl(g.id+"|pick|"+p.id,p.q,p.sub,p.opts,p.opts.map(()=>"p"),p.rec)));
+  (g.checks||[]).forEach((c,i)=>box.appendChild(rowEl(g.id+"|chk|"+i,c,null,["Good","Needs work","Skipped"],["g","b","s"])));
+  if(g.jc){const d=$("details"); d.appendChild($("summary",null,"Judgment calls ("+g.jc.length+"), all Accepted unless you press Change"));
+    g.jc.forEach((t,i)=>{const key=g.id+"|jc|"+i; const r=$("div","jc"); r.appendChild($("div",null,(i+1)+". "+t));
+      const x=$("button",null,"Change"); const n=$("input","n"); n.placeholder="Change it how?"; n.style.gridColumn="1/-1";
+      x.onclick=()=>{const on=!x.classList.contains("on"); x.classList.toggle("on",on); x.classList.toggle("b",on); n.classList.toggle("show",on);
+        if(on)ST[key]={v:"Change",note:n.value}; else delete ST[key]; upd();};
+      n.oninput=()=>{if(ST[key])ST[key].note=n.value;};
+      r.appendChild(x); r.appendChild(n); d.appendChild(r);});
+    box.appendChild(d);}
+  main.appendChild(box);
+});
+function upd(){
+  const v=Object.values(ST); const good=v.filter(x=>x.v==="Good").length, bad=v.filter(x=>x.v==="Needs work").length, ch=v.filter(x=>x.v==="Change").length;
+  document.getElementById("sum").textContent=v.length?`${good} good, ${bad} need work, ${ch} judgment calls to change`:"No picks yet.";
+}
+upd();
+document.getElementById("copy").onclick=()=>{
+  const L=["PLAYTEST SWEEP 2026-11-19"];
+  SWEEP.forEach(g=>{
+    const lines=[];
+    (g.picks||[]).forEach(p=>{const s=ST[g.id+"|pick|"+p.id]; lines.push(`- ${p.q}: ${s?s.v+(s.note?" ("+s.note+")":""):"not picked"}`);});
+    (g.checks||[]).forEach((c,i)=>{const s=ST[g.id+"|chk|"+i]; if(s) lines.push(`- ${c}: ${s.v}${s.note?" - "+s.note:""}`);});
+    if(g.jc){const ch=g.jc.map((t,i)=>[i,t,ST[g.id+"|jc|"+i]]).filter(x=>x[2]);
+      lines.push(ch.length?`- Judgment calls: accept all except`:`- Judgment calls: accept all ${g.jc.length}`);
+      ch.forEach(([i,t,s])=>lines.push(`  - #${i+1} ${t}: change${s.note?" - "+s.note:""}`));}
+    const any=(g.checks||[]).some((c,i)=>ST[g.id+"|chk|"+i]);
+    if(g.checks&&!any) lines.unshift("- Not tested this time");
+    L.push("", g.name+(g.ver?" "+g.ver:"")); L.push(...lines);
+  });
+  const txt=L.join("\n");
+  const done=()=>{const b=document.getElementById("copy"); b.textContent="Copied. Paste it in chat"; setTimeout(()=>b.textContent="Copy my picks",2500);};
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(done,()=>fallback(txt)); else fallback(txt);
+  function fallback(t){const a=$("textarea"); a.value=t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); done();}
+};
+</script>
+</body></html>
