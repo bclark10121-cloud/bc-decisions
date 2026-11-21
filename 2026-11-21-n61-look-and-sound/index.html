@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sinkhole Story: look and sound</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600;700&family=Bowlby+One&family=Pacifico&family=Rammetto+One&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16), built from templates/decision-page in game-studio. New game look and sound page for N61 Sinkhole Story.
+     Added to the template for this page: media {still: "name"} draws a sketch once (no Moving preview tag) and media {font: "Name"} sets the title in a web font. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;max-width:800px;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.card canvas{width:100%;max-width:800px;aspect-ratio:4/3;border-radius:10px;margin:8px 0;background:#000;display:block}
+.fontbox{max-width:800px;border-radius:10px;margin:8px 0;padding:54px 16px;text-align:center;background:linear-gradient(#39b3c2 0 16%,#eafcfb 16% 19%,#f4e3b5 19%);color:#3a2a1c;font-size:clamp(34px,8vw,76px);line-height:1.1;text-shadow:0 3px 0 #fff7ea}
+.fontbox small{display:block;font:600 13px Inter,sans-serif;color:#6b5a45;text-shadow:none;margin-top:14px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// ---------- sketch kit ----------
+const TAU=Math.PI*2, NAME='Sinkhole Story';
+const DAY={sea:'#39b3c2',foam:'#eafcfb',sand:'#f4e3b5',sand2:'#e6cf98',wood:'#c9975f',wood2:'#a97a47'};
+const DUSK={sea:'#e9806a',foam:'#ffe1c4',sand:'#f2c79a',sand2:'#dfa877',wood:'#9a5f4d',wood2:'#7a4638'};
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+function el(g,x,y,rx,ry,c){g.fillStyle=c;g.beginPath();g.ellipse(x,y,Math.abs(rx),Math.abs(ry),0,0,TAU);g.fill()}
+function rr(g,x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
+function beach(g,x,y,w,h,t,p,sea,walk){p=p||DAY;const sy=y+h*sea,by=y+h*walk;
+  g.fillStyle=p.sand;g.fillRect(x,y,w,h);
+  g.fillStyle=p.sand2;for(let i=0;i<60;i++){g.fillRect(x+(i*197)%w,sy+18+((i*113)%Math.max(10,by-sy-26)),4,2)}
+  if(sea>0){g.fillStyle=p.foam;g.beginPath();g.moveTo(x,y);for(let k=0;k<=w;k+=16)g.lineTo(x+k,sy+10+Math.sin(k*.025+t*1.3)*6);g.lineTo(x+w,y);g.fill();
+    g.fillStyle=p.sea;g.beginPath();g.moveTo(x,y);for(let k=0;k<=w;k+=16)g.lineTo(x+k,sy+Math.sin(k*.025+t*1.3+.8)*6);g.lineTo(x+w,y);g.fill()}
+  if(walk<1){g.fillStyle=p.wood;g.fillRect(x,by,w,y+h-by);g.strokeStyle=p.wood2;g.lineWidth=2;for(let k=0;k<w;k+=46){g.beginPath();g.moveTo(x+k,by);g.lineTo(x+k,y+h);g.stroke()}g.fillStyle='rgba(0,0,0,.14)';g.fillRect(x,by,w,5)}}
+function shadow(g,x,y,rx){el(g,x,y,rx,rx*.33,'rgba(60,40,20,.2)')}
+function hole(g,x,y,r,style,t,sq){sq=sq||.6;const ry=r*sq;style=style||'sand';
+  if(style==='ring'){const n=12;for(let i=0;i<n;i++){g.fillStyle=i%2?'#fff7ea':'#e2493f';g.beginPath();g.ellipse(x,y,r*1.22,ry*1.22,0,i/n*TAU,(i+1)/n*TAU);g.ellipse(x,y,r*.98,ry*.98,0,(i+1)/n*TAU,i/n*TAU,true);g.fill()}}
+  else if(style==='swirl'){el(g,x,y,r*1.12,ry*1.12,'#8fe3d9');el(g,x,y,r*1.05,ry*1.05,'#2aa7a8')}
+  else{el(g,x,y,r*1.14,ry*1.14,'#e0c98f');el(g,x,y,r*1.06,ry*1.06,'#b99a62')}
+  el(g,x,y,r,ry,style==='swirl'?'#0f6a73':style==='ring'?'#2f3a4a':'#4a3a28');
+  g.save();g.beginPath();g.ellipse(x,y,r,ry,0,0,TAU);g.clip();
+  const gr=g.createRadialGradient(x,y+ry*.5,r*.05,x,y+ry*.4,r*1.05);
+  if(style==='swirl'){gr.addColorStop(0,'#01090b');gr.addColorStop(1,'#07363c')}else{gr.addColorStop(0,'#020306');gr.addColorStop(1,'#101823')}
+  el(g,x,y+ry*.36,r*1.02,ry*1.02,gr);
+  if(style==='swirl'){g.strokeStyle='rgba(143,227,217,.6)';g.lineWidth=Math.max(1.5,r*.045);for(let k=0;k<3;k++){g.beginPath();for(let a=0;a<4.4;a+=.15){const rad=r*(1-a/4.6),ang=a+(t||0)*1.5+k*TAU/3,px=x+Math.cos(ang)*rad,py=y+Math.sin(ang)*rad*sq;a?g.lineTo(px,py):g.moveTo(px,py)}g.stroke()}}
+  g.restore()}
+function ball(g,x,y,r,rot){shadow(g,x+r*.15,y+r*.95,r);const cs=['#e2493f','#fff7ea','#f5c63a','#fff7ea','#2f8fd0','#fff7ea'];for(let i=0;i<6;i++){g.fillStyle=cs[i];g.beginPath();g.moveTo(x,y);g.arc(x,y,r,(rot||0)+i*TAU/6,(rot||0)+(i+1)*TAU/6);g.fill()}el(g,x-r*.3,y-r*.38,r*.22,r*.15,'rgba(255,255,255,.65)')}
+function shell(g,x,y,s,c){g.fillStyle=c||'#f6a6a0';g.beginPath();g.arc(x,y,s,Math.PI,0);g.lineTo(x,y+s*.55);g.fill();g.strokeStyle='rgba(255,255,255,.75)';g.lineWidth=Math.max(1,s*.12);for(let i=-2;i<=2;i++){g.beginPath();g.moveTo(x,y+s*.4);g.lineTo(x+i*s*.38,y-s*.75);g.stroke()}}
+function pail(g,x,y,s,c){shadow(g,x,y+s*.55,s*.7);g.fillStyle=c||'#e2493f';g.beginPath();g.moveTo(x-s*.6,y-s*.5);g.lineTo(x+s*.6,y-s*.5);g.lineTo(x+s*.42,y+s*.55);g.lineTo(x-s*.42,y+s*.55);g.fill();el(g,x,y-s*.5,s*.6,s*.18,'#f5c63a');g.strokeStyle='#fff7ea';g.lineWidth=s*.09;g.beginPath();g.arc(x,y-s*.5,s*.6,Math.PI,0);g.stroke()}
+function umbrella(g,x,y,s,c,tilt){g.save();g.translate(x,y);shadow(g,s*.1,0,s*.8);g.rotate(tilt||0);g.strokeStyle='#f1ede4';g.lineWidth=s*.07;g.beginPath();g.moveTo(0,0);g.lineTo(0,-s*1.5);g.stroke();
+  for(let i=0;i<8;i++){g.fillStyle=i%2?'#fff7ea':(c||'#e2493f');g.beginPath();g.moveTo(0,-s*1.5);g.ellipse(0,-s*1.5,s,s*.42,0,i/8*TAU,(i+1)/8*TAU);g.fill()}el(g,0,-s*1.5,s*.09,s*.05,'#f5c63a');g.restore()}
+function canopy(g,x,y,r,c,rot){for(let i=0;i<8;i++){g.fillStyle=i%2?'#fff7ea':(c||'#e2493f');g.beginPath();g.moveTo(x,y);g.arc(x,y,r,(rot||0)+i/8*TAU,(rot||0)+(i+1)/8*TAU);g.fill()}el(g,x,y,r*.09,r*.09,'#f5c63a')}
+function chair(g,x,y,s,c){shadow(g,x,y+s*.32,s*.7);g.save();g.translate(x,y);g.strokeStyle='#a97a47';g.lineWidth=s*.09;g.lineCap='round';g.beginPath();g.moveTo(-s*.45,s*.3);g.lineTo(s*.3,-s*.9);g.moveTo(-s*.5,-s*.15);g.lineTo(s*.6,s*.3);g.stroke();
+  g.fillStyle=c||'#2f8fd0';g.beginPath();g.moveTo(-s*.4,s*.18);g.lineTo(-s*.05,s*.3);g.lineTo(s*.58,-s*.72);g.lineTo(s*.24,-s*.86);g.fill();g.strokeStyle='#fff7ea';g.lineWidth=s*.06;for(const k of [.3,.6]){g.beginPath();g.moveTo(-s*.4+k*.35*s,s*.18+k*.12*s);g.lineTo(s*.24+k*.34*s,-s*.86+k*.14*s);g.stroke()}g.restore()}
+function cone(g,x,y,s,rot){g.save();g.translate(x,y);g.rotate(rot||0);g.fillStyle='#d9a55c';g.beginPath();g.moveTo(-s*.45,-s*.1);g.lineTo(s*.45,-s*.1);g.lineTo(0,s*1.1);g.fill();g.strokeStyle='#b9833d';g.lineWidth=Math.max(1,s*.04);g.beginPath();g.moveTo(-s*.3,-s*.1);g.lineTo(s*.12,s*.8);g.moveTo(s*.3,-s*.1);g.lineTo(-s*.12,s*.8);g.stroke();
+  el(g,0,-s*.38,s*.56,s*.5,'#f7a8c4');el(g,-s*.17,-s*.55,s*.15,s*.1,'rgba(255,255,255,.65)');el(g,0,-s*.9,s*.13,s*.13,'#e2493f');g.restore()}
+function shack(g,x,y,s,o){o=o||{};g.save();g.translate(x,y);g.rotate(o.tilt||0);shadow(g,0,0,s*1.15);
+  rr(g,-s,-s*1.1,s*2,s*1.1,6,'#fff3dc');rr(g,-s*.7,-s*.82,s*1.4,s*.46,4,'#5b3b2a');rr(g,-s*.8,-s*.4,s*1.6,s*.1,3,'#c9975f');
+  g.fillStyle=o.roof||'#2f8fd0';g.beginPath();g.moveTo(-s*1.1,-s*1.1);g.lineTo(-s*.8,-s*1.5);g.lineTo(s*.8,-s*1.5);g.lineTo(s*1.1,-s*1.1);g.fill();
+  const n=8,sw=s*2.2/n;for(let i=0;i<n;i++){g.fillStyle=i%2?'#fff7ea':'#e2493f';const x0=-s*1.1+i*sw;g.beginPath();g.moveTo(x0,-s*1.1);g.lineTo(x0+sw,-s*1.1);g.lineTo(x0+sw,-s*.9);g.arc(x0+sw/2,-s*.9,sw/2,0,Math.PI);g.fill()}
+  if(!o.noCone)cone(g,0,-s*1.5-s*.55,s*.5,o.coneRot||0);g.restore()}
+function drop(g,k,x,y,hx,hy,draw){if(k>=1)return;if(k<=0){draw(x,y,1);return}g.save();g.globalAlpha=1-k*k;draw(x+(hx-x)*k,y+(hy-y)*k+k*10,1-k*.6);g.restore()}
+function title(g,w,h,c,y){g.fillStyle=c;g.font='700 60px Inter,sans-serif';g.textAlign='center';g.fillText(NAME,w*.5,h*(y||.18))}
+function ringHud(g,x,y,r,k,label){g.lineWidth=r*.28;g.strokeStyle='rgba(255,255,255,.55)';g.beginPath();g.arc(x,y,r,0,TAU);g.stroke();g.strokeStyle='#f2b84b';g.beginPath();g.arc(x,y,r,-Math.PI/2,-Math.PI/2+TAU*k);g.stroke();g.fillStyle='#3a2a1c';g.font='700 '+Math.round(r*.8)+'px Inter,sans-serif';g.textAlign='center';g.fillText(label,x,y+r*.28)}
+// icon art, one rounded square
+function iconArt(g,x,y,S,v){g.save();g.beginPath();g.roundRect(x,y,S,S,S*.22);g.clip();
+  if(v==='a'){g.fillStyle=DAY.sand;g.fillRect(x,y,S,S);g.fillStyle=DAY.sea;g.fillRect(x,y,S,S*.2);g.fillStyle=DAY.foam;g.fillRect(x,y+S*.2,S,S*.035);hole(g,x+S*.46,y+S*.66,S*.33,'sand',0,.62);ball(g,x+S*.7,y+S*.4,S*.19,.5)}
+  if(v==='b'){g.fillStyle=DAY.sand;g.fillRect(x,y,S,S);hole(g,x+S*.5,y+S*.52,S*.34,'sand',0,1);g.save();g.beginPath();g.rect(x,y,S,S);g.clip();canopy(g,x+S*.66,y+S*.34,S*.3,'#e2493f',.3);g.restore()}
+  if(v==='c'){const gr=g.createLinearGradient(0,y,0,y+S);gr.addColorStop(0,'#f7b38a');gr.addColorStop(.55,'#e9806a');gr.addColorStop(.56,DUSK.sand);gr.addColorStop(1,DUSK.sand);g.fillStyle=gr;g.fillRect(x,y,S,S);el(g,x+S*.78,y+S*.2,S*.11,S*.11,'#ffe9b0');hole(g,x+S*.5,y+S*.76,S*.33,'sand',0,.55);cone(g,x+S*.5,y+S*.34,S*.26,.35)}
+  g.restore()}
+function iconSheet(g,w,h,v){const gr=g.createLinearGradient(0,0,w,h);gr.addColorStop(0,'#283250');gr.addColorStop(1,'#3b2f55');g.fillStyle=gr;g.fillRect(0,0,w,h);
+  iconArt(g,60,100,400,v);iconArt(g,560,130,130,v);iconArt(g,601,390,48,v);
+  g.fillStyle='#fff';g.font='600 16px Inter,sans-serif';g.textAlign='center';g.fillText('Big',260,540);g.fillText('Home screen size',625,292);g.fillText(NAME,625,316);g.fillText('Tiny',625,470)}
+// gameplay sketch into a box
+function play(g,x,y,w,h,v,st){st=st||'sand';g.save();g.beginPath();g.rect(x,y,w,h);g.clip();
+  if(v===1){beach(g,x,y,w,h,0,DAY,.14,.74);chair(g,x+w*.16,y+h*.4,w*.07);umbrella(g,x+w*.3,y+h*.45,w*.085,'#2f8fd0');umbrella(g,x+w*.82,y+h*.42,w*.085,'#f5c63a');chair(g,x+w*.72,y+h*.5,w*.07,'#e2493f');pail(g,x+w*.9,y+h*.62,w*.025);
+    hole(g,x+w*.5,y+h*.62,w*.13,st,0);umbrella(g,x+w*.585,y+h*.6,w*.085,'#e2493f',-.55);ball(g,x+w*.4,y+h*.5,w*.035,.8);shell(g,x+w*.2,y+h*.66,w*.012);shell(g,x+w*.66,y+h*.86,w*.012,'#fff3dc');ringHud(g,x+w*.08,y+h*.13,w*.04,.7,'4')}
+  if(v===2){beach(g,x,y,w,h,0,DAY,.12,.6);hole(g,x+w*.5,y+h*.8,w*.3,st,0,.5);shack(g,x+w*.5,y+h*.72,w*.16,{tilt:.16,coneRot:.5});ball(g,x+w*.14,y+h*.5,w*.03,.2);umbrella(g,x+w*.86,y+h*.5,w*.07,'#f5c63a');ringHud(g,x+w*.08,y+h*.13,w*.04,.95,'6')}
+  if(v===3){beach(g,x,y,w,h,0,DAY,0,1);const ys=y+h*.55;[.3,.42,.54,.66,.78].forEach((u,i)=>shell(g,x+w*u,ys+Math.sin(i*2)*h*.05,w*.028,['#f6a6a0','#fff3dc','#f5c63a','#bfe9f2','#f6a6a0'][i]));el(g,x+w*.9,y+h*.3,w*.02,w*.014,'#9aa3a8');el(g,x+w*.6,y+h*.82,w*.02,w*.014,'#9aa3a8');
+    hole(g,x+w*.16,ys,w*.07,st,0);g.save();g.globalAlpha=.7;shell(g,x+w*.17,ys+h*.01,w*.018);g.restore();pail(g,x+w*.84,y+h*.74,w*.07,'#2f8fd0');ringHud(g,x+w*.08,y+h*.13,w*.04,.35,'1')}
+  g.restore()}
+function shelfCard(g,w,h,v){g.fillStyle='#14121c';g.fillRect(0,0,w,h);play(g,0,75,800,450,v);g.fillStyle='#a9a2b8';g.font='600 14px Inter,sans-serif';g.textAlign='center';g.fillText('Card picture area, 16:9',w/2,560)}
+function look(g,w,h,st,t){beach(g,0,0,w,h,0,DAY,.12,.66);shell(g,w*.12,h*.36,14);shell(g,w*.22,h*.5,12,'#fff3dc');pail(g,w*.86,h*.36,34,'#2f8fd0');hole(g,w*.45,h*.62,170,st,t||0);ball(g,w*.82,h*.66,52,.6);
+  g.fillStyle='#3a2a1c';g.font='600 16px Inter,sans-serif';g.textAlign='left';g.fillText('Shown on sand and boardwalk, beach ball for scale',20,h-18)}
+function menu(g,w,h,th){const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,th.top[0]);gr.addColorStop(1,th.top[1]);g.fillStyle=gr;g.fillRect(0,0,w,h);
+  g.fillStyle=th.ink;g.font='700 56px Inter,sans-serif';g.textAlign='center';g.fillText(NAME,w/2,120);
+  ['Play','Settings','Records'].forEach((s,i)=>{rr(g,w/2-150,165+i*74,300,58,16,i?th.btn2:th.btn);g.fillStyle=i?th.btn2Ink:th.btnInk;g.font='600 24px Inter,sans-serif';g.fillText(s,w/2,203+i*74)});
+  rr(g,60,h-180,w-120,130,18,th.panel);g.fillStyle=th.panelInk;g.textAlign='left';g.font='600 20px Inter,sans-serif';g.fillText('New page: Beach umbrella',90,h-132);g.font='20px Inter,sans-serif';g.fillText('"Shade is a state of mind. Was a state of mind."',90,h-100);g.fillStyle=th.acc;g.font='600 16px Inter,sans-serif';g.textAlign='right';g.fillText('Press A to continue',w-90,h-68)}
+function phone(g,w,h,mode){g.fillStyle='#14121c';g.fillRect(0,0,w,h);const pw=300,ph=560,px=70,py=20;rr(g,px-10,py-10,pw+20,ph+20,34,'#0b0a10');g.save();g.beginPath();g.roundRect(px,py,pw,ph,24);g.clip();
+  beach(g,px,py,pw,ph,0,DAY,.1,.8);umbrella(g,px+pw*.74,py+ph*.3,34,'#2f8fd0');chair(g,px+pw*.22,py+ph*.26,30);shell(g,px+pw*.3,py+ph*.52,9);shell(g,px+pw*.7,py+ph*.56,9,'#fff3dc');
+  const hx=px+pw*.5,hy=py+ph*.42;hole(g,hx,hy,44,'sand',0);ball(g,hx-58,hy-14,17,.5);
+  const arrow=(x0,y0,x1,y1,c)=>{g.strokeStyle=c;g.fillStyle=c;g.lineWidth=5;g.lineCap='round';g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();const a=Math.atan2(y1-y0,x1-x0);g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-14*Math.cos(a-.5),y1-14*Math.sin(a-.5));g.lineTo(x1-14*Math.cos(a+.5),y1-14*Math.sin(a+.5));g.fill()};
+  const thumb=(x,y)=>{el(g,x,y,26,26,'rgba(255,255,255,.55)');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(x,y,26,0,TAU);g.stroke()};
+  if(mode==='slide'){thumb(px+pw*.4,py+ph*.74);arrow(px+pw*.4,py+ph*.74,px+pw*.62,py+ph*.66,'#fff');arrow(hx,hy,hx+66,hy-45,'#f2b84b')}
+  if(mode==='follow'){thumb(hx,hy+92);g.setLineDash([6,7]);g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.moveTo(hx,hy+64);g.lineTo(hx,hy+30);g.stroke();g.setLineDash([])}
+  if(mode==='stick'){el(g,px+pw*.24,py+ph*.84,48,48,'rgba(0,0,0,.25)');g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=3;g.beginPath();g.arc(px+pw*.24,py+ph*.84,48,0,TAU);g.stroke();el(g,px+pw*.3,py+ph*.81,22,22,'rgba(255,255,255,.8)');arrow(hx,hy,hx+66,hy-34,'#f2b84b')}
+  el(g,px+pw*.82,py+ph*.86,30,30,'#e2493f');g.fillStyle='#fff';g.font='600 11px Inter,sans-serif';g.textAlign='center';g.fillText('RUMBLE',px+pw*.82,py+ph*.867);
+  g.restore();g.fillStyle='#f1ece2';g.font='600 19px Inter,sans-serif';g.textAlign='left';
+  const notes={slide:['White: your thumb slides','Gold: the hole moves the same way','The hole is never under your thumb'],follow:['The hole floats just above your finger','Most direct','Your hand covers the lower screen'],stick:['A stick appears under your left thumb','Like a controller','Needs the left side of the screen']}[mode];
+  notes.forEach((s,i)=>g.fillText(s,px+pw+44,250+i*38))}
+const TH={
+ a:{top:['#39b3c2','#f4e3b5'],ink:'#17323a',btn:'#e2493f',btnInk:'#fff7ea',btn2:'#fff7ea',btn2Ink:'#17323a',panel:'#fff7ea',panelInk:'#3a2a1c',acc:'#c2372e'},
+ b:{top:['#f7b38a','#7a3f6b'],ink:'#3b1830',btn:'#f5c63a',btnInk:'#3b1830',btn2:'#4a2748',btn2Ink:'#ffe9d2',panel:'#3b1e3a',panelInk:'#ffe9d2',acc:'#f5c63a'},
+ c:{top:['#b9f0dc','#ffd3e0'],ink:'#3d3550',btn:'#ff8fb1',btnInk:'#3d3550',btn2:'#fffbe6',btn2Ink:'#3d3550',panel:'#fffbe6',panelInk:'#3d3550',acc:'#3aa58c'}};
+const SCENES = {
+  // A: low tide. The hole slides along a row of shells, they drop in, then an umbrella teeters and tips in.
+  lowtide(g,t,w,h){beach(g,0,0,w,h,t,DAY,.22,.82);const c=t%9,y=h*.62,xs=[.2,.31,.42,.53,.64].map(u=>w*u);
+    pail(g,w*.3,h*.42,22);ball(g,w*.6,h*.4,22,t*.3);chair(g,w*.13,h*.45,40);
+    const e=cl(c/6,0,1),hx=w*(.07+.69*(e*e*(3-2*e))),eaten=xs.filter(sx=>hx>sx).length,k=cl((c-6.5)/1.2,0,1),r=30+eaten*5+k*16;
+    hole(g,hx,y,r,'sand',t);
+    xs.forEach((sx,i)=>drop(g,(hx-sx)/(w*.05),sx,y,hx,y,(px,py,s)=>shell(g,px,py,13*s,['#f6a6a0','#fff3dc','#f5c63a','#f6a6a0','#bfe9f2'][i])));
+    const ux=w*.86,wob=(c>5.2&&k===0)?Math.sin(c*14)*.09:0;
+    if(k<1){g.save();g.globalAlpha=1-k*k*k;umbrella(g,ux-(ux-hx)*k,y+k*18,62*(1-k*.45),'#e2493f',wob-k*1.3);g.restore()}
+    title(g,w,h,'#17323a',.34)},
+  // B: sunset pier. The giant cone on the Snack Shack roof wobbles and drops into the hole, then the shack leans.
+  sunset(g,t,w,h){beach(g,0,0,w,h,t,DUSK,.3,.72);el(g,w*.12,h*.13,46,46,'#ffe9b0');const c=t%8,sx=w*.5,sy=h*.7,s=110,hy=h*.86;
+    const k=cl((c-2.6)/1.1,0,1),lean=cl((c-4.4)/3,0,1),r=96+cl((c-3.7)/.5,0,1)*22;
+    hole(g,sx,hy,r,'sand',t,.42);
+    shack(g,sx,sy+lean*10,s,{noCone:true,roof:'#39b3c2',tilt:lean*.12+(lean>0?Math.sin(c*9)*.01:0)});
+    const cy=sy-s*1.5-s*.55,wob=c<2.6?Math.sin(c*8)*.12*cl(c/2.6,0,1):0;
+    if(k<1){g.save();g.globalAlpha=1-k*k*k;cone(g,sx+k*10,cy+(hy-cy)*k*k,s*.5*(1-k*.3),wob+k*2.2);g.restore()}
+    if(c>3.7&&c<4.4){g.strokeStyle='rgba(255,241,220,'+(1-(c-3.7)/.7)+')';g.lineWidth=6;g.beginPath();g.ellipse(sx,hy,r*(1.1+(c-3.7)),r*.42*(1.1+(c-3.7)),0,0,TAU);g.stroke()}
+    title(g,w,h,'#3b1830',.12)},
+  // C: postcard from above. The hole drifts in a slow loop and beach balls roll in from the edges.
+  postcard(g,t,w,h){g.fillStyle='#fffaf0';g.fillRect(0,0,w,h);const m=26;g.save();g.beginPath();g.rect(m,m,w-2*m,h-2*m);g.clip();
+    g.fillStyle=DAY.sand;g.fillRect(0,0,w,h);g.fillStyle=DAY.foam;g.beginPath();g.moveTo(0,0);for(let y=0;y<=h;y+=16)g.lineTo(w*.2+Math.sin(y*.02+t)*14+10,y);g.lineTo(0,h);g.fill();g.fillStyle=DAY.sea;g.beginPath();g.moveTo(0,0);for(let y=0;y<=h;y+=16)g.lineTo(w*.2+Math.sin(y*.02+t+.7)*14,y);g.lineTo(0,h);g.fill();
+    canopy(g,w*.42,h*.3,44,'#2f8fd0',.2);canopy(g,w*.8,h*.72,44,'#f5c63a',.5);
+    const hx=w*.6+Math.sin(t*.5)*w*.16,hy=h*.55+Math.sin(t)*h*.14;hole(g,hx,hy,58,'sand',t,1);
+    const st=[[w*.3,h*.9],[w*.95,h*.2],[w*.5,h*.08],[w*.95,h*.9],[w*.3,h*.15]];
+    st.forEach((p,i)=>{const k=((t-i*1.5)%7.5+7.5)%7.5/2;if(k>1.25)return;const roll=cl(k,0,1),f=cl((k-1)/.25,0,1),bx=p[0]+(hx-p[0])*roll,by=p[1]+(hy-p[1])*roll;g.save();g.globalAlpha=1-f;const rad=24*(1-f*.6);for(let j=0;j<6;j++){g.fillStyle=['#e2493f','#fff7ea','#f5c63a','#fff7ea','#2f8fd0','#fff7ea'][j];g.beginPath();g.moveTo(bx,by);g.arc(bx,by,rad,roll*6+j*TAU/6,roll*6+(j+1)*TAU/6);g.fill()}g.restore()});
+    g.restore();rr(g,w-m-96,m+12,72,86,4,'#fffaf0');rr(g,w-m-90,m+18,60,74,2,'#e2493f');shell(g,w-m-60,m+60,16,'#fff7ea');
+    g.fillStyle='#17323a';g.font='600 20px Inter,sans-serif';g.textAlign='left';g.fillText('Greetings from Saltbox Pier',m+18,h-m-18);title(g,w,h,'#17323a',.2)},
+  icon_a(g,t,w,h){iconSheet(g,w,h,'a')},icon_b(g,t,w,h){iconSheet(g,w,h,'b')},icon_c(g,t,w,h){iconSheet(g,w,h,'c')},
+  look_a(g,t,w,h){look(g,w,h,'sand')},look_b(g,t,w,h){look(g,w,h,'swirl',t)},look_c(g,t,w,h){look(g,w,h,'ring')},
+  colors_a(g,t,w,h){menu(g,w,h,TH.a)},colors_b(g,t,w,h){menu(g,w,h,TH.b)},colors_c(g,t,w,h){menu(g,w,h,TH.c)},
+  shelf_1(g,t,w,h){shelfCard(g,w,h,1)},shelf_2(g,t,w,h){shelfCard(g,w,h,2)},shelf_3(g,t,w,h){shelfCard(g,w,h,3)},
+  ctl_a(g,t,w,h){phone(g,w,h,'slide')},ctl_b(g,t,w,h){phone(g,w,h,'follow')},ctl_c(g,t,w,h){phone(g,w,h,'stick')}
+};
+const DECISION = {
+  title: "Sinkhole Story: look and sound",
+  intro: "Pick how Sinkhole Story (N61) looks, sounds and plays. Look first, then sound and feel, then the story, the name and the next lot. One pick per question.",
+  note: "Nothing is built yet. Your picks go into the brief before the first build. Every picture here is a quick sketch drawn in code to choose a direction. The chosen ones get made properly in the clean toy render look. Sound effect reels play in this order: menu click, small plop, big gulp, the hole grows, Rumble, lot finished. They are stand-ins made in code. All six music tracks are Kevin MacLeod (CC BY 4.0) from Patch.gg and none is used by another game. Each clip is 35 seconds. Two changes from the standard page: the hero section is the hole itself, since the hole is the player, and a Story frame section is added. Backup names and taglines are not name-checked yet.",
+  label: "Sinkhole Story picks",
+  questions: [
+    { id: "icon", name: "APK icon", sub: "The phone app icon. Also the game page and browser tab icon (G6.10). Each card shows it big, at home screen size and tiny.",
+      options: [
+        { title: "Beach ball on the rim", meta: ["A beach ball about to tip into the hole", "Says the game in one picture, clear when tiny"], media: {still: "icon_a"}, rec: true },
+        { title: "Umbrella from above", meta: ["Straight down view, a striped umbrella sliding in", "Boldest shapes, reads a little abstract"], media: {still: "icon_b"} },
+        { title: "Sunset cone", meta: ["An ice cream cone dropping in at sunset", "Warmest colors, the hole is smaller"], media: {still: "icon_c"} } ] },
+    { id: "hero", name: "The hole's look", sub: "You are the hole, so this is the hero (G8.6). It must read on sand and on boardwalk at every size.",
+      options: [
+        { title: "Sandy sinkhole", meta: ["A soft sand rim and a deep dark middle", "Reads as a real hole, calmest"], media: {still: "look_a"}, rec: true },
+        { title: "Tide pool swirl", meta: ["A teal glow with a slow swirl inside", "Most magical, moves even when you stand still"], media: {draw: "look_b"} },
+        { title: "Life ring rim", meta: ["A red and white striped ring around the hole", "Easiest to spot, most toy-like"], media: {still: "look_c"} } ] },
+    { id: "scene", name: "Start screen scene", sub: "The scene behind the title and its hero motion (G5.21). No other game uses a beach. Moving sketches.",
+      options: [
+        { title: "Low tide", meta: ["The hole slides along a row of shells and they drop in", "Then a beach umbrella teeters and tips in"], media: {draw: "lowtide"}, rec: true },
+        { title: "Sunset at the Snack Shack", meta: ["The giant cone sign wobbles and drops off the roof", "Then the shack starts to lean"], media: {draw: "sunset"} },
+        { title: "Postcard from above", meta: ["A postcard view straight down", "The hole drifts and beach balls roll in"], media: {draw: "postcard"} } ] },
+    { id: "colors", name: "Menu and page colors", sub: "Menu buttons, the talk box and the gradient at the top of the game page (G1.13).",
+      options: [
+        { title: "Sunny boardwalk", meta: ["Sea teal, sand cream and coral red", "Matches the first lot"], media: {still: "colors_a"}, rec: true },
+        { title: "Sunset pier", meta: ["Peach, plum and gold", "Warmer and moodier"], media: {still: "colors_b"} },
+        { title: "Saltwater taffy", meta: ["Mint, pink and butter", "Softest and most playful"], media: {still: "colors_c"} } ] },
+    { id: "font", name: "Title font", sub: "The name on the start screen, the game page and the Game Shelf card (G5.21). No other game uses these.",
+      options: [
+        { title: "Bowlby One", meta: ["Chunky hand-painted sign letters", "Google Fonts, OFL"], media: {font: "Bowlby One"}, rec: true },
+        { title: "Pacifico", meta: ["Surf shop brush script", "Google Fonts, OFL. Softer, a little harder to read small"], media: {font: "Pacifico"} },
+        { title: "Rammetto One", meta: ["Bouncy boardwalk poster letters", "Google Fonts, OFL"], media: {font: "Rammetto One"} } ] },
+    { id: "art", name: "Art direction", sub: "The style block that starts every Gemini prompt for this game (G8.6). You picked the first one in chat.",
+      options: [
+        { title: "Clean toy render (now)", meta: ["Glossy rounded toy models, soft studio light, a seaside boardwalk on a bright morning", "Palette: sand cream, sea teal, coral red, sunflower yellow, boardwalk wood, sky blue", "Matches Brickhop, Tiny Tailwind and Marble Rush"], rec: true },
+        { title: "Flat low-poly pastel", meta: ["Simple flat shapes and soft colors", "Fastest to make, no Meshy step"] },
+        { title: "Hand-painted storybook", meta: ["Textured and warm, like Home by Dusk", "Slowest to make in 3D"] } ] },
+    { id: "shelf", name: "Game Shelf card picture", sub: "The picture on your Game Shelf card. Gameplay only (G2.7). The real one is a screenshot once the look is in.",
+      options: [
+        { title: "Umbrella row", meta: ["Mid-size hole, an umbrella tipping in between the chairs"], media: {still: "shelf_1"}, rec: true },
+        { title: "Closing time", meta: ["The biggest moment: the Snack Shack leaning into the hole"], media: {still: "shelf_2"} },
+        { title: "First gulps", meta: ["Close up: a small hole and a trail of shells"], media: {still: "shelf_3"} } ] },
+    { id: "title", name: "Start screen music", sub: "Plays on the title screen. Sunny and relaxed.",
+      options: [
+        { title: "Tiki Bar Mixer", meta: ["Bright, grooving, relaxed. Steel drum and marimba", "Slow, 3:32"], media: {audio: "audio/tiki_bar_mixer.mp3"}, rec: true },
+        { title: "Paradise Found", meta: ["Bright, grooving, bouncy. Steel drum and synths", "Mid tempo, 3:07"], media: {audio: "audio/paradise_found.mp3"} },
+        { title: "Island Meet and Greet", meta: ["Bouncy, bright, grooving. Steel drum, marimba and ukulele", "Mid tempo, 3:37"], media: {audio: "audio/island_meet_and_greet.mp3"} } ] },
+    { id: "play", name: "Gameplay music", sub: "Plays while you swallow the lot. Must differ from the start screen music.",
+      options: [
+        { title: "Chee Zee Beach", meta: ["Bright, grooving, humorous. Marimba, guitar and steel drum", "Mid tempo, 3:23"], media: {audio: "audio/chee_zee_beach.mp3"}, rec: true },
+        { title: "Bossa Antigua", meta: ["Bright, grooving, relaxed. Guitar, bass and drums", "Slow, 4:43. The calmest"], media: {audio: "audio/bossa_antigua.mp3"} },
+        { title: "Surf Shimmy", meta: ["Grooving, bright, bouncy. Surf guitar and organ", "Fast, 2:03. The liveliest"], media: {audio: "audio/surf_shimmy.mp3"} } ] },
+    { id: "sfx", name: "Sound effects style", sub: "Each reel plays a menu click, a small plop, a big gulp, the hole growing, Rumble and the lot finish.",
+      options: [
+        { title: "Soft pops and plops", meta: ["Round cartoon drops and a low gulp", "Calm and funny"], media: {audio: "audio/sfx_plops.mp3"}, rec: true },
+        { title: "Wooden boardwalk", meta: ["Knocks and clacks like planks and pilings", "Warm and dry"], media: {audio: "audio/sfx_wood.mp3"} },
+        { title: "Arcade bleeps", meta: ["Retro chip sounds", "Punchy, least calm"], media: {audio: "audio/sfx_arcade.mp3"} } ] },
+    { id: "calm", name: "Calm level (G4.1)", sub: "The game has no way to fail. This sets how gentle the rest is.",
+      options: [
+        { title: "Fully calm", meta: ["No timer, no score, no fail", "Crabs and gulls step aside and are never swallowed", "Hint glow and a bigger starting hole are switches in Settings"], rec: true },
+        { title: "Calmer", meta: ["Same, with the hint glow on by default", "The next thing that fits always glows"] },
+        { title: "Cheekier", meta: ["Crabs and gulls can be swallowed too", "They pop back out, annoyed and unharmed, when the lot ends"] } ] },
+    { id: "controls", name: "Phone controls", sub: "The default on a phone. Keyboard and Xbox stay standard (G5.8). The others stay in Settings.",
+      options: [
+        { title: "Slide anywhere", meta: ["Slide a thumb anywhere and the hole moves the same way", "Nothing is hidden under your thumb"], media: {still: "ctl_a"}, rec: true },
+        { title: "Follow my finger", meta: ["The hole floats just above your finger", "Most direct, your hand covers part of the screen"], media: {still: "ctl_b"} },
+        { title: "Floating stick", meta: ["A stick appears under your left thumb", "Feels like a controller"], media: {still: "ctl_c"} } ] },
+    { id: "tagline", name: "Tagline", sub: "One line under the name on the Game Shelf card and the game page (G1.10).",
+      options: [
+        { title: "One small hole, one whole boardwalk", meta: ["Short, and says where it ends"], rec: true },
+        { title: "Be the hole and swallow the boardwalk", meta: ["Most direct"] },
+        { title: "A calm game about a hole with a big appetite", meta: ["Leads with calm"] } ] },
+    { id: "story", name: "Story frame", sub: "Extra section for this game. Text only, in the talk box (G5.20). It also sets the voice of the catalog notes.",
+      options: [
+        { title: "The fisher's tall tale", meta: ["An old fisher on the pier tells how a little hole ate the boardwalk", "Each lot is one part of the tale. Catalog notes are in the fisher's voice"], rec: true },
+        { title: "Postcards home", meta: ["A kid on holiday writes one postcard per lot", "Catalog notes are the kid's scribbles"] },
+        { title: "No story", meta: ["Lots and catalog notes only", "Fastest, least to read"] } ] },
+    { id: "name", name: "Backup name", sub: "No game named Sinkhole Story turned up. The nearest is Sinkhole.io, the same kind of game. Pick a backup in case the full check says change it.",
+      options: [
+        { title: "Keep Sinkhole Story, no backup yet", meta: ["Decide after the full name check"], rec: true },
+        { title: "Gulp Harbor", meta: ["Fits the sounds and the seaside"] },
+        { title: "The Boardwalk Hole", meta: ["Plain and clear"] },
+        { title: "Low Tide Hole", meta: ["Fits the calm mood"] } ] },
+    { id: "next", name: "Next lot", sub: "The second lot after the Snack Shack. Each new lot brings a new hole trick.",
+      options: [
+        { title: "The arcade pier", meta: ["Prize stalls, a carousel and bumper cars. Ends with the Ferris wheel", "New trick: a puff of air that lifts balloons and kites"], rec: true },
+        { title: "The harbor", meta: ["Crab traps, dinghies and a fish market. Ends with the lighthouse", "New trick: fill up with water so things float"] },
+        { title: "Campground at dusk", meta: ["Tents, lanterns and a camp store. Ends with a camper van", "New trick: a glow that shows hidden things"] } ] } ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.font){const e=document.createElement('div');e.className='fontbox';e.style.fontFamily=`'${md.font}',sans-serif`;e.textContent=NAME;const s=document.createElement('small');s.textContent=md.font;e.appendChild(s);c.appendChild(e)}
+    if(md.still&&SCENES[md.still]){const e=document.createElement('canvas');e.width=800;e.height=600;e.dataset.still=md.still;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=800;e.height=600;e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title,n:(picks[q.id]||{}).n};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+function stills(){document.querySelectorAll('canvas[data-still]').forEach(c=>{const g=c.getContext('2d');g.save();SCENES[c.dataset.still](g,0,c.width,c.height);g.restore()})}
+stills();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(stills);
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n&&p.n.trim()?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked`+(n<DECISION.questions.length?'':'. Press Copy my picks.'):'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
