@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Split Level: look and sound</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600;700&family=Space+Mono:wght@400;700&family=Special+Elite&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16), built from templates/decision-page in game-studio. New game look and sound page for N18 Split Level. Pictures are sketches made in code from the processed textures only. -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(832px,100%),832px));justify-content:start;gap:16px;margin-top:10px}
+.card{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 4px;font-size:17px}.meta{color:var(--mute);font-size:13px}
+.card img,.card video{width:100%;max-width:800px;border-radius:10px;margin:8px 0}audio{width:100%;margin:10px 0 8px}
+.card canvas{width:100%;max-width:800px;aspect-ratio:4/3;border-radius:10px;margin:8px 0;background:#000;display:block}
+.fontbox{max-width:800px;border-radius:10px;margin:8px 0;padding:54px 16px;text-align:center;background:linear-gradient(#d9d1c4,#ece7df 60%,#c9975f 60%);color:#2a2622;font-size:clamp(34px,8vw,76px);line-height:1.1;text-shadow:0 3px 0 #fff7ea}
+.fontbox small{display:block;font:600 13px Inter,sans-serif;color:#5a5048;text-shadow:none;margin-top:14px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><button id="copy">Copy my picks</button></div></div>
+<script>
+
+const NAME='Split Level';
+const SCENES={};
+const I=n=>'img/'+n+'.jpg', A=n=>'audio/'+n+'.mp3';
+const DECISION = {
+  title: "Split Level: look and sound",
+  intro: "Pick how Split Level (N18) looks and sounds. Look first, then sound and feel, then what comes next. One pick per question. Release 0.2 is being built now with the Recommended picks, so anything you change gets swapped in before or after release.",
+  note: "Pictures marked Sketch are quick drawings made in code from the textures cut from your photos. The chosen ones get built for real in the game. Real screenshots from the 0.2 build are marked Screenshot. Sound effect reels play in this order: menu click, door latch, door swings open, four footsteps, the cat purrs, the new room settles. They are stand-ins made in code. All six music tracks are Kevin MacLeod (incompetech.com, CC BY 4.0) from the Patch.gg library, none used by another game. Each plays its first 75 seconds. Dropped: Backup name, since you settled on Split Level. Hero is the black cat, since you never see yourself.",
+  label: "Split Level picks",
+  questions: [
+    { id: "icon", name: "APK icon", sub: "The phone app icon. Also the game page and browser tab icon (G6.10). Each card shows it big, at home screen size and tiny.",
+      options: [
+        { title: "Door ajar with the cat", meta: ["Your front door open a crack, warm light in the gap, the cat waiting", "Says the game in one picture. Sketch"], media: {img: I('icon_a')}, rec: true },
+        { title: "The cat up close", meta: ["Amber eyes on the oak floor", "Boldest at tiny size, says less about doors. Sketch"], media: {img: I('icon_b')} },
+        { title: "Split stairs", meta: ["Half flight up, half flight down, a door at the top", "Names the house, busier when tiny. Sketch"], media: {img: I('icon_c')} } ] },
+    { id: "hero", name: "The black cat", sub: "You never see yourself, so the cat is the face of the game (G8.6). Low-poly, made in code, about 10 inches tall sitting.",
+      options: [
+        { title: "Amber eyes", meta: ["All black, warm amber eyes", "Warmest, matches the lamp light. Sketch"], media: {img: I('cat_a')}, rec: true },
+        { title: "Green eyes", meta: ["All black, soft green eyes", "Cooler, a touch more mysterious. Sketch"], media: {img: I('cat_b')} },
+        { title: "Red collar", meta: ["Amber eyes and a plain red collar, no tag", "Reads as someone's pet. Sketch"], media: {img: I('cat_c')} } ] },
+    { id: "scene", name: "Start screen scene", sub: "The scene behind the title and its hero motion (G5.21). Inside your house only, never a view outside.",
+      options: [
+        { title: "The landing (now)", meta: ["From the top of the stairs: the front door ajar with a warm glow, the cat on the landing", "Motion: the door swings a little wider, the glow grows, the cat looks up. Sketch"], media: {img: I('scene_a')}, rec: true },
+        { title: "Hall of doors", meta: ["The upstairs hall, three doors, the far one open and glowing, the cat at the end", "Motion: the far door drifts open. Sketch"], media: {img: I('scene_b')} },
+        { title: "The den at dusk", meta: ["The fireplace wall, warm lamp light, the back door open a crack, the cat on the floor", "Motion: the glow pulses, the cat's tail swishes. Sketch"], media: {img: I('scene_c')} } ] },
+    { id: "colors", name: "Menu and page colors", sub: "Menu buttons, the talk box and the gradient at the top of the game page (G1.13).",
+      options: [
+        { title: "Greige and oak (now)", meta: ["Your wall color with oak brown buttons", "Calm and homey. Sketch"], media: {img: I('menu_a')}, rec: true },
+        { title: "Evening lavender", meta: ["Dusky purple panels, warm gold buttons", "Moodier, still soft. Sketch"], media: {img: I('menu_b')} },
+        { title: "Paper and slate", meta: ["Clean white panels, slate gray buttons", "Coolest and plainest. Sketch"], media: {img: I('menu_c')} } ] },
+    { id: "font", name: "Title font", sub: "The name on the start screen, the game page and the Game Shelf card (G5.21). No other game uses these. All SIL OFL.",
+      options: [
+        { title: "Space Mono", meta: ["Plain and a little off, like a label in an empty office", "Fits the liminal feel best"], media: {font: "Space Mono"}, rec: true },
+        { title: "Special Elite", meta: ["Old typewriter, slightly worn", "More eerie, a touch of horror movie"], media: {font: "Special Elite"} },
+        { title: "Cormorant Garamond", meta: ["Quiet, elegant book serif", "Softest, reads as a house tour"], media: {font: "Cormorant Garamond"} } ] },
+    { id: "art", name: "Art direction", sub: "How the photo textures are shown in the rooms (G8.6). Each card shows the den and the material swatches in that look.",
+      options: [
+        { title: "True to the photos (now)", meta: ["Real colors from your photos on simple rooms, soft warm light", "Most like your house. Sketch"], media: {img: I('art_a')}, rec: true },
+        { title: "Soft painted", meta: ["Fewer colors, flatter, like a painting of the house", "Friendlier, less real. Sketch"], media: {img: I('art_b')} },
+        { title: "Faded tape", meta: ["Washed out and a little yellow, like an old home video", "The classic Backrooms feel, less warm. Sketch"], media: {img: I('art_c')} } ] },
+    { id: "title", name: "Start screen music", sub: "Plays on the title screen. Calm with a quiet strangeness.",
+      options: [
+        { title: "Comfortable Mystery", meta: ["Calming, eerie, relaxed. Solo vintage electric piano", "Slow, 3:56. Surreal, never scary"], media: {audio: A('comfortable_mystery')}, rec: true },
+        { title: "Almost New", meta: ["Calming, bright, mysterious. Piano and bass", "Slow, 3:23. A summer visit to an old relative's house"], media: {audio: A('almost_new')} },
+        { title: "Ghost Story", meta: ["Calming, mysterious. Vibraphone, waterphone and piano", "Very slow, 5:20. The spookiest of the three"], media: {audio: A('ghost_story')} } ] },
+    { id: "play", name: "Gameplay music", sub: "Plays quietly under the room sound while you walk. Must differ from the start screen music.",
+      options: [
+        { title: "Clean Soul", meta: ["Calming, mysterious, relaxed. Electric piano and bass", "Slow, 5:07. Lots of space, sits well under the room hum"], media: {audio: A('clean_soul')}, rec: true },
+        { title: "Comfortable Mystery 4", meta: ["Calming, eerie, somber. Gentle electric piano", "1:16 loop. Same family as the title pick"], media: {audio: A('comfortable_mystery_4')} },
+        { title: "Mesmerize", meta: ["Somber, calming. Solo piano", "Slow, 7:04. Never quite resolves"], media: {audio: A('mesmerize')} } ] },
+    { id: "sfx", name: "Sound effects style", sub: "Each reel plays a menu click, the door latch, the door swinging open, four footsteps, the cat's purr and the new room settling.",
+      options: [
+        { title: "Real house", meta: ["Dry wood and metal, like your actual doors", "Most grounded"], media: {audio: A('sfx_real')}, rec: true },
+        { title: "Far away", meta: ["Muffled, as if heard through a wall, a long hush", "More dreamlike, softer"], media: {audio: A('sfx_far')} },
+        { title: "Glass and chimes", meta: ["Soft bell tones on each door and step", "Most musical, least like a house"], media: {audio: A('sfx_glass')} } ] },
+    { id: "calm", name: "Calm level (G4.1)", sub: "There is no way to lose. This sets how strange the rooms get.",
+      options: [
+        { title: "Gently odd (now)", meta: ["Rooms change shape, size, colors and doors. Never dark, no figures, no sudden sounds", "Eerie but safe, as you asked"], rec: true },
+        { title: "Cozy", meta: ["Changes stay small and friendly, like the house rearranged itself", "Closest to a relaxing walk"] },
+        { title: "Uneasy", meta: ["Deeper rooms get dimmer and emptier, longer halls, louder hum", "Still no threats or jump scares"] } ] },
+    { id: "controls", name: "Phone controls", sub: "The default on a phone. Keyboard and Xbox stay standard (G5.8). The others stay in Settings.",
+      options: [
+        { title: "Pad and drag (now)", meta: ["Left thumb pad to walk, right thumb drags to look, an Open button near a door", "What 0.1 shipped with. Sketch"], media: {img: I('ctl_a')}, rec: true },
+        { title: "Tap to walk", meta: ["Tap the floor to walk there, tap a door to open it, drag to look", "One thumb, slowest. Sketch"], media: {img: I('ctl_b')} },
+        { title: "Two sticks", meta: ["A walk stick and a look stick, tap a door to open", "Most like a console game. Sketch"], media: {img: I('ctl_c')} } ] },
+    { id: "tagline", name: "Tagline", sub: "One line under the name on the Game Shelf card and the game page (G1.10).",
+      options: [
+        { title: "Every door opens somewhere new.", meta: ["Says the loop, calm"], rec: true },
+        { title: "Home, one door at a time.", meta: ["Warmest, hints the house changes"] },
+        { title: "Nobody's home. Keep walking.", meta: ["Eeriest of the three"] } ] },
+    { id: "next", name: "Next after 0.2", sub: "What release 0.3 adds.",
+      options: [
+        { title: "The lower level", meta: ["The family room, laundry and garage side join the true house and the shells", "Doubles the house, as planned"], rec: true },
+        { title: "Your things, made safe", meta: ["Plain furniture in the true rooms: couches, beds, the table, rugs", "The house feels lived in"] },
+        { title: "Stranger changes", meta: ["Ten new changes: stairs to nowhere, rooms in rooms, a kitchen of doors", "The deep doors get more surprising"] } ] }
+  ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="2" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.font){const e=document.createElement('div');e.className='fontbox';e.style.fontFamily=`'${md.font}',sans-serif`;e.textContent=NAME;const s=document.createElement('small');s.textContent=md.font;e.appendChild(s);c.appendChild(e)}
+    if(md.still&&SCENES[md.still]){const e=document.createElement('canvas');e.width=800;e.height=600;e.dataset.still=md.still;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=800;e.height=600;e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title,n:(picks[q.id]||{}).n};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+function stills(){document.querySelectorAll('canvas[data-still]').forEach(c=>{const g=c.getContext('2d');g.save();SCENES[c.dataset.still](g,0,c.width,c.height);g.restore()})}
+stills();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(stills);
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n&&p.n.trim()?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked`+(n<DECISION.questions.length?'':'. Press Copy my picks.'):'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
