@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grave Odds 0.5 picks</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     push it to bclark10121-cloud/bc-decisions as <date>-<topic>/index.html, add it to that repo's index.html
+     open https://bclark10121-cloud.github.io/bc-decisions/<date>-<topic>/ in a NEW full-width browser tab
+     and put that full link in the reply. Never as a Claude artifact. BC picks, presses Copy my picks and pastes the text in chat.
+     A new game's look and sound page uses the sections in NEW_GAME_LOOK_AND_SOUND.md, APK icon first (BC, 2026-11-20). -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:6px}
+.card{background:var(--card);border:2px solid transparent;border-radius:10px;padding:9px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 2px;font-size:14px}.meta{color:var(--mute);font-size:12px;line-height:1.35}
+.card img,.card video{width:100%;border-radius:7px;margin:5px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+const SCENES = {};
+const DECISION = {
+ "title": "Grave Odds 0.5: choices and 10 new charms",
+ "intro": "0.5 is Tier 2 from the fun research: choices and planning. Pick which features go in, which 10 charms and the art model. My picks are marked.",
+ "note": "Recommended scope is the research's suggested 0.5: items 1 to 5 plus charm set A. Items 6 and 7 got 1 of 4 votes. Each Build pick is small, so all seven fit if you want them, at about 2 more hours of build and test. After you paste: I write the build briefs, builders build and test, a fresh review runs, then the release with new screenshots and the Shelf card.",
+ "label": "Grave Odds 0.5 picks",
+ "questions": [
+  {
+   "id": "boss_omen",
+   "name": "1. Boss omen",
+   "sub": "The floor boss and its twist show from the first map row.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "You see the boss and its rule before you pick a route",
+      "Small build"
+     ],
+     "media": {},
+     "rec": true
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Boss stays a surprise until you reach it"
+     ],
+     "media": {}
+    }
+   ]
+  },
+  {
+   "id": "omen_row",
+   "name": "2. Omen row",
+   "sub": "Monsters show their next 2 or 3 moves above their portrait.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "Strike, guard, curse a card or burn a discard, shown ahead",
+      "You plan hands around what is coming",
+      "Small to medium build"
+     ],
+     "media": {},
+     "rec": true
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Monsters keep striking with no warning"
+     ],
+     "media": {}
+    }
+   ]
+  },
+  {
+   "id": "culling_fire",
+   "name": "3. Culling Fire",
+   "sub": "At a Rest room, burn a card from your deck or copy one.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "Thin the deck toward flushes or copy your best card",
+      "Small build"
+     ],
+     "media": {},
+     "rec": true
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Deck stays the standard 52"
+     ],
+     "media": {}
+    }
+   ]
+  },
+  {
+   "id": "tithe_box",
+   "name": "4. Tithe box",
+   "sub": "Gold you keep earns interest between rooms, capped, with a meter.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "Saving gold becomes a choice against spending it",
+      "Small build"
+     ],
+     "media": {},
+     "rec": true
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Gold only buys"
+     ],
+     "media": {}
+    }
+   ]
+  },
+  {
+   "id": "weigh_scale",
+   "name": "5. Weigh scale",
+   "sub": "New loot shows its lines next to the worn item, plus damage on your best hand with up and down arrows.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "Loot reads in one glance (pillar 2)",
+      "Small build"
+     ],
+     "media": {},
+     "rec": true
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Compare by reading both panels"
+     ],
+     "media": {}
+    }
+   ]
+  },
+  {
+   "id": "curio_packs",
+   "name": "6. Curio packs and restocks",
+   "sub": "At a shop, pick 1 of 3 charms from a sealed pack. Each restock costs more that visit.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "More ways to find charms",
+      "Small to medium build",
+      "Research gave it 1 of 4 votes"
+     ],
+     "media": {}
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Charms come from fights, shrines and events as today"
+     ],
+     "media": {},
+     "rec": true
+    }
+   ]
+  },
+  {
+   "id": "waystone",
+   "name": "7. Waystone boons",
+   "sub": "At each floor start, pick 1 of 3 boons that each carry a cost.",
+   "options": [
+    {
+     "title": "Build in 0.5",
+     "meta": [
+      "A choice at every floor, such as +1 discard for -10 health",
+      "Small build",
+      "Research gave it 1 of 4 votes"
+     ],
+     "media": {}
+    },
+    {
+     "title": "Later",
+     "meta": [
+      "Floors start as they do today"
+     ],
+     "media": {},
+     "rec": true
+    }
+   ]
+  },
+  {
+   "id": "charm_set",
+   "name": "8. The 10 new charms",
+   "sub": "Abilities reused from the Balatro list you sent, with original names. Force is Chips, Fury is Mult, gold is money. Numbers are first drafts, tuned by the bot balance run.",
+   "options": [
+    {
+     "title": "A. Suits and hands",
+     "rec": true,
+     "media": {},
+     "meta": [
+      "Bleeding Heart Reliquary, Miser's Diamond, Gravedigger's Spade, Hangwood Club: +2 Fury per card of that suit scored",
+      "Twin Skulls: +3 Fury if the hand holds a Pair",
+      "Pallbearer's Pair: +4 Fury if Two Pair",
+      "Three Crows: +5 Fury if Three of a Kind",
+      "Mourner's Coin: +25 Force if the hand holds a Pair",
+      "Half Candle: +6 Fury when you play 3 cards or fewer",
+      "Bone Scholar: each Ace scored gives +10 Force and +1 Fury",
+      "Matches the backlog's first five: the four suits and the Pair charm"
+     ]
+    },
+    {
+     "title": "B. Discards and the deck",
+     "media": {},
+     "meta": [
+      "Tattered Banner: +15 Force for each discard left",
+      "Empty Shrine: +6 Fury when you have no discards left",
+      "Even Bones: +1 Fury per even card scored",
+      "Odd Ossuary: +8 Force per odd card scored",
+      "Spiral Shell: +2 Fury per A, 2, 3, 5 or 8 scored",
+      "Grinning Mask: +12 Force per face card scored",
+      "Reliquary of Many: +1 Fury per charm you carry",
+      "Moss Idol: +1 Fury per hand this fight, -1 per discard",
+      "Ashen Road: +1 Fury for each hand in a row with no face card, resets",
+      "Thief's Lantern: each fight starts with 1 more discard"
+     ]
+    },
+    {
+     "title": "C. Gold and risk",
+     "media": {},
+     "meta": [
+      "Gilded Skull: earn 4 gold after each fight",
+      "Bull Idol: +1 Force per 2 gold you hold",
+      "Patient Purse: earn 2 gold per discard left when a fight ends",
+      "Grave Robber: each face card scored, 1 in 2 chance of 2 gold",
+      "Climbing Lantern: earn 1 gold per fight, 1 more after each boss",
+      "Wax Effigy: +6 Fury, 1 in 6 chance to melt after a fight",
+      "Melting Tallow: +60 Force, loses 5 each hand",
+      "Burning Wick: +8 Fury, loses 1 each fight",
+      "Fasting Bowl: x2 Fury, loses x0.01 per card discarded",
+      "Pairs well with the Tithe box"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "charm_art",
+   "name": "9. Charm medallion art",
+   "sub": "Ten new stained glass medallions, made through tools/nano_banana.py. The current 20 look like this:",
+   "options": [
+    {
+     "title": "Nano Banana 2.1",
+     "rec": true,
+     "meta": [
+      "Same model as the 20 charms you have, so the set matches",
+      "Faster"
+     ],
+     "media": {
+      "img": "img/medallions_nb21.jpg"
+     }
+    },
+    {
+     "title": "Nano Banana Pro",
+     "meta": [
+      "Same model as your new number cards",
+      "More detail, may look a little different from the first 20"
+     ],
+     "media": {
+      "img": "img/medallions_nb21.jpg"
+     }
+    }
+   ]
+  }
+ ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="1" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=480;e.height=270;e.style.cssText='width:100%;aspect-ratio:16/9;border-radius:10px;margin:8px 0;background:#000;display:block';e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked`+(n<DECISION.questions.length?'':'. Press Copy my picks.'):'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
