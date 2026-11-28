@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grave Odds 0.4.7: painted win moment</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600&family=New+Rocker&display=swap" rel="stylesheet">
+<!-- Decision page (G0.16). Copy this folder, fill in DECISION below, put previews beside it (audio/, img/, video/),
+     push it to bclark10121-cloud/bc-decisions as <date>-<topic>/index.html, add it to that repo's index.html
+     open https://bclark10121-cloud.github.io/bc-decisions/<date>-<topic>/ in a NEW full-width browser tab
+     and put that full link in the reply. Never as a Claude artifact. BC picks, presses Copy my picks and pastes the text in chat.
+     A new game's look and sound page uses the sections in NEW_GAME_LOOK_AND_SOUND.md, APK icon first (BC, 2026-11-20). -->
+<style>
+:root{--bg:#14121c;--card:#1f1c2b;--ink:#f1ece2;--mute:#a9a2b8;--acc:#f2b84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+header,main{max-width:none;margin:0;padding:0 28px}header{padding-top:28px}main{padding-bottom:130px}
+h1{font:600 28px Fraunces,serif;margin:0 0 6px}h2{font:600 21px Fraunces,serif;margin:28px 0 0}
+.mute{color:var(--mute)}.note{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,400px));gap:10px;margin-top:6px}
+.card{background:var(--card);border:2px solid transparent;border-radius:10px;padding:9px}.card.on{border-color:var(--acc)}
+.opt{color:var(--acc);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+h3{margin:2px 0 2px;font-size:14px}.meta{color:var(--mute);font-size:12px;line-height:1.35}
+.card img,.card video{width:100%;border-radius:7px;margin:5px 0}audio{width:100%;margin:10px 0 8px}
+.rec{display:inline-block;background:#2e2a40;color:var(--acc);font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:6px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:#2e2a40;color:var(--ink)}
+.card.on .pick{background:var(--acc);color:#1b1608}
+textarea{width:100%;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid #2e2a40;border-radius:10px;padding:10px;font:14px Inter,sans-serif}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0c13ee;border-top:1px solid #2e2a40;padding:12px 20px}
+.bar div{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}#sum{flex:1;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#copy{background:var(--acc);color:#1b1608}.spd.on{background:#4a4368;color:var(--acc)}.live{position:relative}.live:after{content:'\25CF  Moving preview';position:absolute;left:10px;top:18px;font:600 11px Inter,sans-serif;color:#fff;background:#0009;border-radius:6px;padding:2px 7px}
+</style></head><body>
+<header><h1 id="title"></h1><p class="mute" id="intro"></p><div class="note" id="note"></div></header>
+<main id="main"></main>
+<div class="bar"><div><span id="sum">No picks yet.</span><span class="mute" style="font-size:13px">Preview speed</span><button class="spd" data-s="1">1x</button><button class="spd on" data-s="2">2x</button><button class="spd" data-s="4">4x</button><button id="copy">Copy my picks</button></div></div>
+<script>
+// Fill this in. Each question gets one pick. media: {audio|img|video: "relative/path"} or {draw: "name"} for a live canvas
+// sketch drawn by SCENES[name](ctx, t, w, h). rec: true marks Claude's recommendation.
+// ---- Grave Odds 0.4.7 win moment previews: one loop of the fight win moment, drawn from the sample pictures ----
+const IMG={};
+function img(k){if(!IMG[k]){const i=new Image();i.src='img/'+k;IMG[k]=i}return IMG[k]}
+const ok=i=>i.complete&&i.naturalWidth>0;
+const ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3), cl=(x,a,b)=>Math.min(b,Math.max(a,x));
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+const DEF={banner:'banner_b_keystone.webp',burst:'burst_a_gold_sunburst.jpg',crack:'crack_a_web.jpg',shards:'own',embers:true};
+// T runs 0 to 7 s: 0 idle, 0.6 cracks, 1.5 shatter and burst, 2.1 banner, 2.3 count-up, hold, 6.4 fade.
+function win(g,t,w,h,o){
+  o=Object.assign({},DEF,o);const T=t%7;
+  g.fillStyle='#0e0c14';g.fillRect(0,0,w,h);
+  const pw=h*0.6,ph=pw*4/3,px=(w-pw)/2,py=h*0.07,cx=w/2,cy=py+ph/2;
+  const P=img('portrait.jpg');
+  // the dark window and its gold frame stay through the whole moment
+  g.fillStyle='#07060b';g.fillRect(px,py,pw,ph);
+  // light burst behind the breaking glass
+  if(T>1.5){const B=img(o.burst);if(ok(B)){const k=ease((T-1.5)/0.5),fade=T<2.6?1:0.38+0.62*Math.max(0,1-(T-2.6)/1.2);
+    const s=pw*(0.5+1.25*k);g.save();g.translate(cx,cy);g.rotate((T-1.5)*0.12);g.globalCompositeOperation='lighter';g.globalAlpha=fade*cl((6.9-T)/0.5,0,1);g.drawImage(B,-s/2,-s/2,s,s);g.restore()}}
+  // the portrait, then its cracks
+  if(T<1.5&&ok(P)){g.drawImage(P,px,py,pw,ph);
+    if(T>0.6){const C=img(o.crack);if(ok(C)){const k=cl((T-0.6)/0.8,0,1);g.save();g.beginPath();g.rect(px,py,pw,ph);g.clip();g.beginPath();g.arc(cx,cy+ph*0.08,ph*0.75*k,0,7);g.clip();g.globalCompositeOperation='lighter';g.globalAlpha=0.55+0.45*k;const z=1.32;g.drawImage(C,cx-pw*z/2,cy-ph*z/2+ph*0.03,pw*z,ph*z);g.restore()}}}
+  // the shatter
+  if(T>=1.5&&T<4.2){const d=T-1.5,N=30;
+    for(let i=0;i<N;i++){const col=i%5,row=Math.floor(i/5),sx=px+(col+0.5)*pw/5,sy=py+(row+0.5)*ph/6;
+      const vx=(sx-cx)*1.6+(rnd(i)-0.5)*90,vy=(sy-cy)*1.2-60-rnd(i+9)*70;
+      const x=sx+vx*d,y=sy+vy*d+260*d*d,a=cl(1-(d-0.9)/1.2,0,1),rot=(rnd(i+3)-0.5)*7*d,sz=pw/5*0.95;
+      if(a<=0)continue;g.save();g.translate(x,y);g.rotate(rot);g.globalAlpha=a;
+      if(o.shards==='own'){if(ok(P)){g.beginPath();g.moveTo(-sz/2,-sz*0.5);g.lineTo(sz*0.5,-sz*0.3);g.lineTo(sz*0.25,sz*0.55);g.lineTo(-sz*0.4,sz*0.35);g.closePath();g.save();g.clip();
+          g.drawImage(P,col*P.naturalWidth/5,row*P.naturalHeight/6,P.naturalWidth/5,P.naturalHeight/6,-sz/2,-sz*0.6,sz,sz*1.25);g.restore();g.lineWidth=2;g.strokeStyle='#0e0c14';g.stroke()}}
+      else{const S=img(o.shards);if(ok(S)){const c=i%4,r=Math.floor(i/4)%3,cw=S.naturalWidth/4,chh=S.naturalHeight/3,k=sz*1.25;g.drawImage(S,c*cw,r*chh,cw,chh,-k/2,-k*0.66,k,k*1.33)}}
+      g.restore()}}
+  // embers rising after the break
+  if(o.embers&&T>1.6){const E=img('embers_a.webp');if(ok(E)){for(let i=0;i<22;i++){const d=(T-1.6-rnd(i)*1.4);if(d<0)continue;const life=2.2+rnd(i+5);const u=d/life;if(u>1)continue;
+      const x=px+rnd(i+1)*pw+Math.sin(d*2+i)*10,y=py+ph*(0.95-0.9*u),s=14+rnd(i+2)*14,cw=E.naturalWidth/4;
+      g.save();g.globalCompositeOperation='lighter';g.globalAlpha=Math.sin(u*Math.PI)*cl((6.9-T)/0.5,0,1);g.drawImage(E,(i%4)*cw,(Math.floor(i/4)%4)*cw,cw,cw,x-s/2,y-s/2,s,s);g.restore()}}}
+  // gold frame
+  g.lineWidth=3;g.strokeStyle='#b58a2e';g.strokeRect(px,py,pw,ph);
+  // banner, title, name and the damage count-up
+  if(T>2.1){const Bn=img(o.banner),k=ease((T-2.1)/0.35),out=cl((6.9-T)/0.4,0,1);
+    const bw=Math.min(w*0.72,pw*1.75),bh=ok(Bn)?bw*Bn.naturalHeight/Bn.naturalWidth:bw*0.3,by=py+ph*0.30-bh/2-(1-k)*h*0.5;
+    g.save();g.globalAlpha=out;
+    if(ok(Bn))g.drawImage(Bn,cx-bw/2,by,bw,bh);
+    const mid=by+bh*(o.banner.indexOf('keystone')>0?0.60:o.banner.indexOf('rose')>0?0.70:0.50);
+    g.textAlign='center';g.textBaseline='middle';g.shadowColor='#000';g.shadowBlur=6;
+    g.fillStyle='#f6dc9a';g.font='400 '+Math.round(bw*0.085)+'px "New Rocker",serif';g.fillText('Slain',cx,mid);
+    g.shadowBlur=8;g.fillStyle='#efe6d2';g.font='600 '+Math.round(h*0.045)+'px Inter,sans-serif';g.fillText('Chapel Ghoul',cx,by+bh+h*0.04);
+    if(T>2.3){const n=Math.round(248*ease((T-2.3)/0.7));g.fillStyle='#e8b84a';g.font='600 '+Math.round(h*0.13)+'px Inter,sans-serif';g.fillText(String(n),cx,by+bh+h*0.15);
+      if(T>3.1){g.fillStyle='#efe6d2';g.font='600 '+Math.round(h*0.04)+'px Inter,sans-serif';g.fillText('Overkill +37',cx,by+bh+h*0.235)}}
+    g.restore()}
+}
+['portrait.jpg','embers_a.webp','banner_a_ribbon.webp','banner_b_keystone.webp','banner_c_rose_band.webp','burst_a_gold_sunburst.jpg','burst_b_violet_halo.jpg','burst_c_ruby_fire.jpg','crack_a_web.jpg','crack_b_lead_break.jpg','crack_c_slash.jpg','shards_a_jewel.webp','shards_b_bone_gold.webp'].forEach(img);
+const SCENES = {
+  ban_a:(g,t,w,h)=>win(g,t,w,h,{banner:'banner_a_ribbon.webp'}),
+  ban_b:(g,t,w,h)=>win(g,t,w,h,{banner:'banner_b_keystone.webp'}),
+  ban_c:(g,t,w,h)=>win(g,t,w,h,{banner:'banner_c_rose_band.webp'}),
+  bur_a:(g,t,w,h)=>win(g,t,w,h,{burst:'burst_a_gold_sunburst.jpg'}),
+  bur_b:(g,t,w,h)=>win(g,t,w,h,{burst:'burst_b_violet_halo.jpg'}),
+  bur_c:(g,t,w,h)=>win(g,t,w,h,{burst:'burst_c_ruby_fire.jpg'}),
+  cr_a:(g,t,w,h)=>win(g,t*0.5,w,h,{crack:'crack_a_web.jpg'}),
+  cr_b:(g,t,w,h)=>win(g,t*0.5,w,h,{crack:'crack_b_lead_break.jpg'}),
+  cr_c:(g,t,w,h)=>win(g,t*0.5,w,h,{crack:'crack_c_slash.jpg'}),
+  sh_own:(g,t,w,h)=>win(g,t,w,h,{shards:'own'}),
+  sh_a:(g,t,w,h)=>win(g,t,w,h,{shards:'shards_a_jewel.webp'}),
+  sh_b:(g,t,w,h)=>win(g,t,w,h,{shards:'shards_b_bone_gold.webp'}),
+  em_on:(g,t,w,h)=>win(g,t,w,h,{embers:true}),
+  em_off:(g,t,w,h)=>win(g,t,w,h,{embers:false}),
+};
+const DECISION = {
+  title: "Grave Odds 0.4.7: the painted win moment",
+  intro: "You asked for a better win animation made with Nano Banana. These are the painted pieces. Godot moves them over the 6 second win moment from 0.4.6. Each preview loops the whole moment with one piece changed. Pick one per section.",
+  note: "All 12 pictures are quick samples (Nano Banana 2.1, about $0.40 in total). The final set is repainted clean after you pick. The crack samples came back with a window frame around them. The final cracks carry no frame and sit right on the monster's glass. The timing, the Slain text, the damage count-up and the skip stay as built in 0.4.6. After you paste your picks: the final art, then the build, then a preview link and test APK.",
+  label: "Grave Odds 0.4.7 win moment picks",
+  questions: [
+    { id: "banner", name: "Slain banner", sub: "Drops in over the broken window. The game writes Slain (or Boss slain) on it in New Rocker.",
+      options: [
+        { title: "Gold ribbon", meta: ["Violet glass ribbon with a gold edge", "Plainest. The title reads fastest"], media: {draw:"ban_a"} },
+        { title: "Skull keystone plaque", meta: ["Ruby and violet plaque with a crowned skull", "Echoes the app icon"], media: {draw:"ban_b"}, rec: true },
+        { title: "Rose window band", meta: ["Tracery band with a half rose window", "Most ornate. Echoes the start screen"], media: {draw:"ban_c"} } ] },
+    { id: "burst", name: "Light burst", sub: "Flares behind the monster as the glass breaks, then dims behind the banner.",
+      options: [
+        { title: "Gold sunburst", meta: ["Candle gold spokes with jewel tips", "Matches the menu gold"], media: {draw:"bur_a"}, rec: true },
+        { title: "Violet halo", meta: ["A saint's halo with thin gold rays", "Quieter. Leaves the middle dark"], media: {draw:"bur_b"} },
+        { title: "Ruby fire", meta: ["A ring of glass flames", "Hottest. Closest to the 0.4.4 kill flare"], media: {draw:"bur_c"} } ] },
+    { id: "crack", name: "Cracks on the monster", sub: "Spread over the portrait before it breaks. These three previews run at half speed so the cracks show.",
+      options: [
+        { title: "Web from one strike", meta: ["Fine cracks from one hit point", "Works on every monster"], media: {draw:"cr_a"}, rec: true },
+        { title: "Lead line break", meta: ["The window comes apart at its lead lines", "Light pours through the gaps"], media: {draw:"cr_b"} },
+        { title: "One big slash", meta: ["A wide diagonal cut with side cracks", "Reads as a sword blow"], media: {draw:"cr_c"} } ] },
+    { id: "crackset", name: "How many crack pictures", sub: "No preview. This sets the art count and the upkeep for each new monster.",
+      options: [
+        { title: "One shared set of three", meta: ["Three crack pictures, picked at random per kill", "No new art when a monster is added"], rec: true },
+        { title: "One per monster", meta: ["15 pictures, each fitted to its monster", "Every new monster needs its own crack picture"] } ] },
+    { id: "shards", name: "Glass shards", sub: "What flies when the portrait breaks.",
+      options: [
+        { title: "The monster's own glass", meta: ["As in 0.4.6: pieces cut from the portrait", "It reads as that monster breaking. No new art"], media: {draw:"sh_own"}, rec: true },
+        { title: "Painted jewel shards", meta: ["Ruby, cobalt, emerald and gold shards", "Brighter, the same for every monster"], media: {draw:"sh_a"} },
+        { title: "Painted bone and gold shards", meta: ["Pale glass with gold edges", "Cleanest against the dark"], media: {draw:"sh_b"} } ] },
+    { id: "embers", name: "Embers", sub: "Small painted sparks that rise through the broken window.",
+      options: [
+        { title: "Embers on", meta: ["Sparks drift up for about two seconds", "Off under Reduce motion"], media: {draw:"em_on"}, rec: true },
+        { title: "No embers", meta: ["Shards and light only"], media: {draw:"em_off"} } ] },
+    { id: "model", name: "Model for the final art", sub: "About 5 to 7 pictures with a shared crack set, about 19 with a crack picture per monster.",
+      options: [
+        { title: "Nano Banana 2.1 (fast)", meta: ["About $0.03 a picture: about $0.25 shared, $0.65 per monster", "The same model as the monsters and medallions"], rec: true },
+        { title: "Nano Banana Pro", meta: ["About $0.13 a picture: about $0.95 shared, $2.55 per monster", "The model you picked for the number cards"] } ] }
+  ]
+};
+const $=s=>document.querySelector(s), picks={};
+$('#title').textContent=DECISION.title;$('#intro').textContent=DECISION.intro;$('#note').textContent=DECISION.note;
+for(const q of DECISION.questions){
+  const sec=document.createElement('section');
+  sec.innerHTML=`<h2></h2><p class="mute"></p><div class="grid"></div><textarea rows="1" placeholder="Notes for this one (optional)"></textarea>`;
+  sec.querySelector('h2').textContent=q.name;sec.querySelector('p').textContent=q.sub||'';
+  q.options.forEach((o,i)=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="opt">Option ${String.fromCharCode(65+i)}${o.rec?'<span class="rec">Recommended</span>':''}</div><h3></h3>`;
+    c.querySelector('h3').textContent=o.title;
+    for(const m of (o.meta||[])){const d=document.createElement('div');d.className='meta';d.textContent=m;c.appendChild(d)}
+    const md=o.media||{};
+    if(md.img){const e=document.createElement('img');e.src=md.img;e.alt=o.title;c.appendChild(e)}
+    if(md.video){const e=document.createElement('video');e.src=md.video;e.controls=true;e.muted=true;e.loop=true;c.appendChild(e)}
+    if(md.draw&&SCENES[md.draw]){const e=document.createElement('canvas');e.width=640;e.height=400;e.style.cssText='width:100%;aspect-ratio:16/10;border-radius:10px;margin:8px 0;background:#000;display:block';e.dataset.draw=md.draw;const wr=document.createElement('div');wr.className='live';wr.appendChild(e);c.appendChild(wr)}
+    if(md.audio){const e=document.createElement('audio');e.src=md.audio;e.controls=true;e.preload='none';c.appendChild(e)}
+    const b=document.createElement('button');b.className='pick';b.textContent='Pick this one';c.appendChild(b);
+    b.onclick=()=>{sec.querySelectorAll('.card').forEach(x=>x.classList.remove('on'));c.classList.add('on');picks[q.id]={q:q.name,o:o.title};draw()};
+    sec.querySelector('.grid').appendChild(c)});
+  sec.querySelector('textarea').oninput=e=>{(picks[q.id]=picks[q.id]||{q:q.name,o:''}).n=e.target.value;draw()};
+  $('#main').appendChild(sec)}
+const cvs=[...document.querySelectorAll('canvas[data-draw]')],seen=new Set();
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting?seen.add(x.target):seen.delete(x.target)));cvs.forEach(c=>io.observe(c));
+let speed=2,clock=0,last=0;document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b))});
+(function loop(ms){clock+=Math.min(100,ms-last)/1000*speed;last=ms;for(const c of seen){const g=c.getContext('2d');g.save();SCENES[c.dataset.draw](g,clock,c.width,c.height);g.restore()}requestAnimationFrame(loop)})(0);
+document.addEventListener('play',e=>{document.querySelectorAll('audio,video').forEach(o=>{if(o!==e.target)o.pause()})},true);
+function text(){return DECISION.label+': '+DECISION.questions.filter(q=>picks[q.id]).map(q=>{const p=picks[q.id];return q.name+': '+(p.o||'no pick')+(p.n?' ('+p.n.trim()+')':'')}).join('. ')+'.'}
+function draw(){const n=DECISION.questions.filter(q=>picks[q.id]&&picks[q.id].o).length;$('#sum').textContent=n?`${n} of ${DECISION.questions.length} picked`+(n<DECISION.questions.length?'':'. Press Copy my picks.'):'No picks yet.'}
+$('#copy').onclick=async e=>{try{await navigator.clipboard.writeText(text());e.target.textContent='Copied'}catch(err){e.target.textContent='Select the text to copy'}setTimeout(()=>e.target.textContent='Copy my picks',1800)};
+</script></body></html>
